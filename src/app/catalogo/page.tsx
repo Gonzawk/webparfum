@@ -12,12 +12,6 @@ const Catalogo: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [showCartModal, setShowCartModal] = useState<boolean>(false);
 
-  // Función para manejar la acción de agregar al carrito
-  const handleAddToCart = (product: Perfume) => {
-    console.log('Producto agregado al carrito:', product);
-    // Aquí puedes implementar la lógica para actualizar el estado del carrito
-  };
-
   useEffect(() => {
     // Función para actualizar el estado de autenticación
     const checkAuth = () => {
