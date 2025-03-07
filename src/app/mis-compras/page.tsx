@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Navbar from '@/app/components/Navbar';
 
 interface SaleDetail {
@@ -29,7 +29,7 @@ const MisCompras: React.FC = () => {
   const [expandedSaleId, setExpandedSaleId] = useState<number | null>(null);
 
   // Función para decodificar el JWT
-  function parseJwt(token: string): any | null {
+  function parseJwt(token: string): unknown | null {
     try {
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -40,18 +40,18 @@ const MisCompras: React.FC = () => {
           .join('')
       );
       return JSON.parse(jsonPayload);
-    } catch (e) {
+    } catch (_e) {
       return null;
     }
   }
 
   // Obtener el ID del usuario desde el token
-  const getUserIdFromToken = (): number | null => {
+  const getUserIdFromToken = useCallback((): number | null => {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (!token) return null;
-    const payload = parseJwt(token);
+    const payload = parseJwt(token) as { nameid?: string; sub?: string } | null;
     return payload?.nameid ? Number(payload.nameid) : payload?.sub ? Number(payload.sub) : null;
-  };
+  }, []);
 
   useEffect(() => {
     const userId = getUserIdFromToken();
@@ -65,7 +65,7 @@ const MisCompras: React.FC = () => {
       .then((res) => res.json())
       .then((data) => setPurchases(data))
       .catch((err) => setError('Error al cargar tus compras: ' + err.message));
-  }, []);
+  }, [getUserIdFromToken]);
 
   const toggleDetails = (ventaId: number) => {
     setExpandedSaleId(expandedSaleId === ventaId ? null : ventaId);

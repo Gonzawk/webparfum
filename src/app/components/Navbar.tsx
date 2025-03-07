@@ -2,13 +2,12 @@
 
 import React, { useState, useContext } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { AuthContext } from '@/app/context/AuthContext';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { tokenPayload, logout } = useContext(AuthContext);
-  const router = useRouter();
+  // Se eliminó la variable "router" ya que no se utiliza
 
   // Opciones para escritorio
   const renderDesktopOptions = () => {

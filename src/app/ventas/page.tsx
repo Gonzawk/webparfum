@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Navbar from '@/app/components/Navbar';
 import PrivateRoutes from '@/app/components/PrivateRoutes';
 
@@ -34,7 +34,7 @@ const Ventas: React.FC = () => {
   const [purchaseMessage, setPurchaseMessage] = useState('');
 
   // Función para decodificar el JWT y obtener el payload
-  function parseJwt(token: string): any | null {
+  function parseJwt(token: string): unknown | null {
     try {
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -45,20 +45,20 @@ const Ventas: React.FC = () => {
           .join('')
       );
       return JSON.parse(jsonPayload);
-    } catch (e) {
+    } catch (_e) {
       return null;
     }
   }
 
   // Función para obtener el ID y el rol del usuario del token
-  const getUserDataFromToken = (): { id: number | null; role: string } => {
+  const getUserDataFromToken = useCallback((): { id: number | null; role: string } => {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (!token) return { id: null, role: '' };
-    const payload = parseJwt(token);
+    const payload = parseJwt(token) as { nameid?: string; sub?: string; role?: string } | null;
     const id = payload?.nameid ? Number(payload.nameid) : payload?.sub ? Number(payload.sub) : null;
     const role = payload?.role || '';
     return { id, role };
-  };
+  }, []);
 
   useEffect(() => {
     const { id, role } = getUserDataFromToken();
@@ -71,8 +71,8 @@ const Ventas: React.FC = () => {
     fetch('http://localhost:5200/api/ventas/lista')
       .then((res) => res.json())
       .then((data) => setSales(data))
-      .catch((err) => setError('Error al cargar las ventas: ' + err.message));
-  }, []);
+      .catch((err) => setError('Error al cargar las ventas: ' + (err instanceof Error ? err.message : err)));
+  }, [getUserDataFromToken]);
 
   const toggleSaleDetails = (ventaId: number) => {
     setExpandedSaleId(expandedSaleId === ventaId ? null : ventaId);
@@ -108,7 +108,12 @@ const Ventas: React.FC = () => {
               : sale
           )
         );
-        setPurchaseMessage(data.Message || (currentEstado.toLowerCase() === 'confirmado' ? 'Venta finalizada exitosamente.' : 'Venta confirmada exitosamente.'));
+        setPurchaseMessage(
+          data.Message ||
+            (currentEstado.toLowerCase() === 'confirmado'
+              ? 'Venta finalizada exitosamente.'
+              : 'Venta confirmada exitosamente.')
+        );
         // Ocultar el mensaje automáticamente después de 5 segundos
         setTimeout(() => {
           setPurchaseMessage('');
@@ -120,8 +125,12 @@ const Ventas: React.FC = () => {
           setPurchaseMessage('');
         }, 5000);
       }
-    } catch (err: any) {
-      setPurchaseMessage(`Error en la solicitud: ${err.message}`);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setPurchaseMessage(`Error en la solicitud: ${err.message}`);
+      } else {
+        setPurchaseMessage("Error en la solicitud.");
+      }
       setTimeout(() => {
         setPurchaseMessage('');
       }, 5000);
@@ -143,14 +152,18 @@ const Ventas: React.FC = () => {
           {userRole === 'Superadmin' && (
             <button
               onClick={() => setActiveTab('ventas')}
-              className={`px-4 py-2 rounded-md font-medium ${activeTab === 'ventas' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}
+              className={`px-4 py-2 rounded-md font-medium ${
+                activeTab === 'ventas' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'
+              }`}
             >
               Ventas
             </button>
           )}
           <button
             onClick={() => setActiveTab('asignadas')}
-            className={`px-4 py-2 rounded-md font-medium ${activeTab === 'asignadas' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}
+            className={`px-4 py-2 rounded-md font-medium ${
+              activeTab === 'asignadas' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'
+            }`}
           >
             Ventas Asignadas
           </button>
@@ -191,14 +204,15 @@ const Ventas: React.FC = () => {
                     >
                       {expandedSaleId === sale.ventaId ? 'Ocultar Detalles' : 'Ver Detalles'}
                     </button>
-                    {activeTab === 'asignadas' && (sale.estado.toLowerCase() === 'pendiente' || sale.estado.toLowerCase() === 'confirmado') && (
-                      <button
-                        onClick={() => confirmSale(sale.ventaId, sale.estado)}
-                        className="bg-green-500 text-white px-3 py-1 rounded"
-                      >
-                        {sale.estado.toLowerCase() === 'confirmado' ? 'Cerrar Venta' : 'Confirmar'}
-                      </button>
-                    )}
+                    {activeTab === 'asignadas' &&
+                      (sale.estado.toLowerCase() === 'pendiente' || sale.estado.toLowerCase() === 'confirmado') && (
+                        <button
+                          onClick={() => confirmSale(sale.ventaId, sale.estado)}
+                          className="bg-green-500 text-white px-3 py-1 rounded"
+                        >
+                          {sale.estado.toLowerCase() === 'confirmado' ? 'Cerrar Venta' : 'Confirmar'}
+                        </button>
+                      )}
                   </div>
                 </div>
                 {/* Vista para pantallas móviles */}
@@ -214,14 +228,15 @@ const Ventas: React.FC = () => {
                       >
                         {expandedSaleId === sale.ventaId ? 'Ocultar' : 'Ver'}
                       </button>
-                      {activeTab === 'asignadas' && (sale.estado.toLowerCase() === 'pendiente' || sale.estado.toLowerCase() === 'confirmado') && (
-                        <button
-                          onClick={() => confirmSale(sale.ventaId, sale.estado)}
-                          className="bg-green-500 text-white px-2 py-1 rounded text-xs"
-                        >
-                          {sale.estado.toLowerCase() === 'confirmado' ? 'Cerrar Venta' : 'Confirmar'}
-                        </button>
-                      )}
+                      {activeTab === 'asignadas' &&
+                        (sale.estado.toLowerCase() === 'pendiente' || sale.estado.toLowerCase() === 'confirmado') && (
+                          <button
+                            onClick={() => confirmSale(sale.ventaId, sale.estado)}
+                            className="bg-green-500 text-white px-2 py-1 rounded text-xs"
+                          >
+                            {sale.estado.toLowerCase() === 'confirmado' ? 'Cerrar Venta' : 'Confirmar'}
+                          </button>
+                        )}
                     </div>
                   </div>
                   <div className="mt-1 text-sm">

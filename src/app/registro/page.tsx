@@ -58,8 +58,12 @@ const Registro: React.FC = () => {
       console.log('Usuario registrado:', result);
       // Muestra un mensaje de éxito, limpia campos o redirige a otra página
       alert(`Registro exitoso. ID de usuario: ${result.UsuarioId}`);
-    } catch (err: any) {
-      setError(`Error en la solicitud: ${err.message}`);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(`Error en la solicitud: ${err.message}`);
+      } else {
+        setError("Error en la solicitud.");
+      }
     }
   };
 

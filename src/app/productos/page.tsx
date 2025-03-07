@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
 import Navbar from '@/app/components/Navbar';
 import PrivateRoutes from '@/app/components/PrivateRoutes';
 import { Perfume } from '@/app/types/Product';
@@ -71,8 +70,12 @@ const Productos: React.FC = () => {
         const msg = await res.text();
         setError(`Error agregando marca: ${msg}`);
       }
-    } catch (err: any) {
-      setError(`Error en la solicitud: ${err.message}`);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(`Error en la solicitud: ${err.message}`);
+      } else {
+        setError("Error en la solicitud.");
+      }
     }
   };
 
@@ -87,8 +90,12 @@ const Productos: React.FC = () => {
         const msg = await res.text();
         setError(`Error eliminando marca: ${msg}`);
       }
-    } catch (err: any) {
-      setError(`Error en la solicitud: ${err.message}`);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(`Error en la solicitud: ${err.message}`);
+      } else {
+        setError("Error en la solicitud.");
+      }
     }
   };
 
@@ -137,8 +144,12 @@ const Productos: React.FC = () => {
           setError(`Error actualizando modelo: ${msg}`);
         }
       }
-    } catch (err: any) {
-      setError(`Error en la solicitud: ${err.message}`);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(`Error en la solicitud: ${err.message}`);
+      } else {
+        setError("Error en la solicitud.");
+      }
     }
   };
 
@@ -183,8 +194,12 @@ const Productos: React.FC = () => {
         const msg = await res.text();
         setError(`Error eliminando producto: ${msg}`);
       }
-    } catch (err: any) {
-      setError(`Error en la solicitud: ${err.message}`);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(`Error en la solicitud: ${err.message}`);
+      } else {
+        setError("Error en la solicitud.");
+      }
     }
   };
 

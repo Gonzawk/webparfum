@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useCart, CartItem } from "@/app/context/CartContext";
-import { Perfume } from "@/app/types/Product";
+// Se eliminó el import de Perfume ya que no se utiliza
+import Image from "next/image";
 
 export interface CartModalProps {
   onClose: () => void;
@@ -58,18 +59,18 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
   };
 
   // Función para decodificar el JWT y extraer el ID del usuario
-  function parseJwt(token: string): any | null {
+  function parseJwt(token: string): unknown | null {
     try {
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
       const jsonPayload = decodeURIComponent(
         atob(base64)
           .split('')
-          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .map((_char) => '%' + ('00' + _char.charCodeAt(0).toString(16)).slice(-2))
           .join('')
       );
       return JSON.parse(jsonPayload);
-    } catch (e) {
+    } catch (_) {
       return null;
     }
   }
@@ -77,8 +78,7 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
   const getUserIdFromToken = (): number | null => {
     const token = localStorage.getItem("token") || sessionStorage.getItem("token");
     if (!token) return null;
-    const payload = parseJwt(token);
-    // Se asume que el ID se encuentra en "nameid" o "sub"
+    const payload = parseJwt(token) as { nameid?: string; sub?: string } | null;
     return payload?.nameid ? Number(payload.nameid) : payload?.sub ? Number(payload.sub) : null;
   };
 
@@ -122,8 +122,12 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
         const msg = await res.text();
         setPurchaseMessage(`Error confirmando compra: ${msg}`);
       }
-    } catch (err: any) {
-      setPurchaseMessage(`Error en la solicitud: ${err.message}`);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setPurchaseMessage(`Error en la solicitud: ${err.message}`);
+      } else {
+        setPurchaseMessage("Error en la solicitud.");
+      }
     }
   };
 
@@ -158,12 +162,13 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
                 key={item.product.perfumeId}
                 className="flex flex-col sm:flex-row items-center border border-gray-300 rounded p-4"
               >
-                <div className="w-16 h-16 flex-shrink-0">
+                <div className="w-16 h-16 flex-shrink-0 relative">
                   {item.product.imagenUrl ? (
-                    <img
+                    <Image
                       src={item.product.imagenUrl}
                       alt={item.product.modelo}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   ) : (
                     <div className="w-full h-full bg-gray-300 flex items-center justify-center">

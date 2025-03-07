@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/app/components/Navbar';
-import Link from 'next/link';
+// Se eliminó el import de Link, ya que no se usa
 import PrivateRoutes from '@/app/components/PrivateRoutes';
+import Image from 'next/image'; // Se agregó para optimizar la imagen
 
 interface Usuario {
   usuarioId: number;
@@ -72,8 +73,12 @@ const Usuarios: React.FC = () => {
         const msg = await res.text();
         setError(`Error eliminando usuario: ${msg}`);
       }
-    } catch (err: any) {
-      setError(`Error en la solicitud: ${err.message}`);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(`Error en la solicitud: ${err.message}`);
+      } else {
+        setError("Error en la solicitud.");
+      }
     }
   };
 
@@ -117,8 +122,12 @@ const Usuarios: React.FC = () => {
         const msg = await res.text();
         setError(`Error agregando usuario: ${msg}`);
       }
-    } catch (err: any) {
-      setError(`Error en la solicitud: ${err.message}`);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(`Error en la solicitud: ${err.message}`);
+      } else {
+        setError("Error en la solicitud.");
+      }
     }
   };
 
@@ -132,9 +141,11 @@ const Usuarios: React.FC = () => {
         {showToast && (
           <div className="fixed top-4 right-4 bg-white border border-gray-300 rounded-lg shadow-lg px-6 py-4 z-50">
             <div className="flex items-center">
-              <img
+              <Image
                 src="https://i.ibb.co/0r1bLZr/verification.png"
                 alt="Confirmación"
+                width={40}
+                height={40}
                 className="w-10 h-10 mr-3"
               />
               <p className="text-gray-800">{toastMessage}</p>

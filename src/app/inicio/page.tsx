@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/app/components/Navbar';
+import Image from 'next/image';
 
 const Inicio: React.FC = () => {
   const [activeSection, setActiveSection] = useState<'inicio' | 'nosotros'>('inicio');
@@ -48,9 +49,11 @@ const Inicio: React.FC = () => {
       <div className="pt-32 p-4 bg-gray-800 min-h-screen">
         {activeSection === 'inicio' && (
           <div className="max-w-4xl mx-auto text-center">
-            <img 
+            <Image 
               src="/logo.png" 
               alt="Logo WebParfum" 
+              width={128}
+              height={128}
               className="mx-auto mb-4 w-32 h-32 object-contain" 
             />
             <h1 className="text-4xl font-bold text-white">Bienvenido a WebParfum</h1>

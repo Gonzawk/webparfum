@@ -21,7 +21,7 @@ const MisDatos: React.FC = () => {
   const router = useRouter();
 
   // Función para decodificar el JWT (igual que en el Navbar)
-  function parseJwt(token: string): any | null {
+  function parseJwt(token: string): unknown | null {
     try {
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -32,7 +32,7 @@ const MisDatos: React.FC = () => {
           .join('')
       );
       return JSON.parse(jsonPayload);
-    } catch (e) {
+    } catch (_e) {
       return null;
     }
   }
@@ -45,7 +45,10 @@ const MisDatos: React.FC = () => {
     }
     const payload = parseJwt(token);
     // Usamos "nameid" (o "sub", según tu configuración) para obtener el identificador
-    const userId = payload && (payload.nameid || payload.sub);
+    const userId = payload
+      ? ((payload as { nameid?: string; sub?: string }).nameid ||
+         (payload as { nameid?: string; sub?: string }).sub)
+      : null;
     if (!userId) {
       setError("Token inválido.");
       return;
@@ -87,8 +90,12 @@ const MisDatos: React.FC = () => {
         const msg = await res.text();
         setError("Error actualizando datos: " + msg);
       }
-    } catch (err: any) {
-      setError("Error en la solicitud: " + err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError("Error en la solicitud: " + err.message);
+      } else {
+        setError("Error en la solicitud.");
+      }
     }
   };
 

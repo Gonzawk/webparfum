@@ -3,7 +3,6 @@
 import React, { useState, useContext } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Navbar from '@/app/components/Navbar';
 import { AuthContext } from '@/app/context/AuthContext';
 
 const Login: React.FC = () => {
@@ -55,8 +54,12 @@ const Login: React.FC = () => {
       } else {
         router.back();
       }
-    } catch (err: any) {
-      setError(`Error en la solicitud: ${err.message}`);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(`Error en la solicitud: ${err.message}`);
+      } else {
+        setError("Error en la solicitud.");
+      }
     }
   };
 
