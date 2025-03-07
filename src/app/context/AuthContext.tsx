@@ -4,10 +4,10 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 
 interface AuthContextType {
-  tokenPayload: any | null;
+  tokenPayload: unknown | null;
   login: (token: string) => void;
   logout: () => void;
-  setTokenPayload: (payload: any | null) => void;
+  setTokenPayload: (payload: unknown | null) => void;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -18,10 +18,10 @@ export const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [tokenPayload, setTokenPayload] = useState<any>(null);
+  const [tokenPayload, setTokenPayload] = useState<unknown | null>(null);
 
   // Función para decodificar el JWT, similar a la del NavBar
-  const parseJwt = (token: string): any | null => {
+  const parseJwt = (token: string): unknown | null => {
     try {
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .join('')
       );
       return JSON.parse(jsonPayload);
-    } catch (e) {
+    } catch {
       return null;
     }
   };
@@ -48,7 +48,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Función para iniciar sesión: guarda el token y actualiza el payload
   const login = (token: string) => {
-    // Puedes elegir entre localStorage o sessionStorage
     localStorage.setItem('token', token);
     const payload = parseJwt(token);
     setTokenPayload(payload);

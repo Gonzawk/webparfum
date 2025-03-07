@@ -28,7 +28,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           .join('')
       );
       return JSON.parse(jsonPayload);
-    } catch (_) {
+    } catch {
       return null;
     }
   }

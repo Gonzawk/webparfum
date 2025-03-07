@@ -45,7 +45,7 @@ const Ventas: React.FC = () => {
           .join('')
       );
       return JSON.parse(jsonPayload);
-    } catch (_e) {
+    } catch {
       return null;
     }
   }

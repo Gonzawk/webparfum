@@ -34,7 +34,7 @@ export function middleware(request: NextRequest) {
     if (payload.role !== 'Admin' && payload.role !== 'Superadmin') {
       return NextResponse.redirect(new URL('/login', request.url));
     }
-  } catch (_error) {
+  } catch {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 

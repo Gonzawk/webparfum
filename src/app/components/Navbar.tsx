@@ -7,7 +7,9 @@ import { AuthContext } from '@/app/context/AuthContext';
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { tokenPayload, logout } = useContext(AuthContext);
-  // Se eliminó la variable "router" ya que no se utiliza
+
+  // Helper to safely get the role from tokenPayload
+  const userRole = (tokenPayload as { role?: string } | null)?.role;
 
   // Opciones para escritorio
   const renderDesktopOptions = () => {
@@ -23,7 +25,7 @@ const Navbar: React.FC = () => {
       );
     }
 
-    if (tokenPayload.role === 'Superadmin') {
+    if (userRole === 'Superadmin') {
       return (
         <>
           <Link href="/mis-datos" className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded" role="menuitem">
@@ -50,7 +52,7 @@ const Navbar: React.FC = () => {
           </button>
         </>
       );
-    } else if (tokenPayload.role === 'Admin') {
+    } else if (userRole === 'Admin') {
       return (
         <>
           <Link href="/mis-datos" className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded" role="menuitem">
@@ -112,7 +114,7 @@ const Navbar: React.FC = () => {
       );
     }
 
-    if (tokenPayload.role === 'Superadmin') {
+    if (userRole === 'Superadmin') {
       return (
         <>
           <Link href="/mis-datos" className="block px-3 py-2 text-base text-gray-300 hover:text-white hover:bg-gray-700 rounded">
@@ -138,7 +140,7 @@ const Navbar: React.FC = () => {
           </button>
         </>
       );
-    } else if (tokenPayload.role === 'Admin') {
+    } else if (userRole === 'Admin') {
       return (
         <>
           <Link href="/mis-datos" className="block px-3 py-2 text-base text-gray-300 hover:text-white hover:bg-gray-700 rounded">

@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { useCart, CartItem } from "@/app/context/CartContext";
-// Se eliminó el import de Perfume ya que no se utiliza
 import Image from "next/image";
 
 export interface CartModalProps {
@@ -70,7 +69,7 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
           .join('')
       );
       return JSON.parse(jsonPayload);
-    } catch (_) {
+    } catch {
       return null;
     }
   }

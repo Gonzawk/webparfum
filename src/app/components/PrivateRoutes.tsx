@@ -1,5 +1,4 @@
 // src/components/PrivateRoutes.tsx
-// src/components/PrivateRoutes.tsx
 'use client';
 
 import React, { useContext, useEffect, useState } from 'react';
@@ -22,8 +21,9 @@ const PrivateRoutes: React.FC<PrivateRoutesProps> = ({ children }) => {
       return;
     }
     setLoading(false);
+    const role = (tokenPayload as { role?: string } | null)?.role;
     // Si no hay token o el rol no es Admin/Superadmin, redirigimos
-    if (!tokenPayload || (tokenPayload.role !== 'Admin' && tokenPayload.role !== 'Superadmin')) {
+    if (!tokenPayload || (role !== 'Admin' && role !== 'Superadmin')) {
       router.push('/login');
     }
   }, [tokenPayload, router]);
