@@ -52,19 +52,22 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   }, []);
 
   return (
-    <div className="relative bg-white rounded-lg shadow-lg overflow-hidden w-full md:w-64">
+    <div className="relative bg-white rounded-lg shadow-lg overflow-hidden w-full md:w-80">
       <Zoom>
         {product.imagenUrl ? (
-          <div className="relative w-full h-64">
+          // Se elimina el contenedor con aspect ratio fijo y se usa Next/Image con sus dimensiones intrínsecas.
+          <div className="w-full">
             <Image
               src={product.imagenUrl}
               alt={product.modelo}
-              fill
-              className="object-cover"
+              width={320}
+              height={240}
+              className="object-contain w-full h-auto"
+              sizes="(max-width: 768px) 100vw, 320px"
             />
           </div>
         ) : (
-          <div className="w-full h-64 bg-gray-300 flex items-center justify-center">
+          <div className="w-full bg-gray-300 flex items-center justify-center" style={{ height: 'auto' }}>
             <span className="text-gray-500">Sin imagen</span>
           </div>
         )}
@@ -85,7 +88,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 <button
                   onClick={() => {
                     addToCart(product);
-                    alert("Producto agregado al carrito");
+                    alert('Producto agregado al carrito');
                   }}
                   className="mt-4 bg-blue-500 hover:bg-blue-600 text-white text-xs px-4 py-2 rounded transition-colors"
                 >
