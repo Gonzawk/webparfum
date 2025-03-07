@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Navbar from '@/app/components/Navbar';
 import { AuthContext } from '@/app/context/AuthContext';
 
 const Login: React.FC = () => {
@@ -141,4 +142,12 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+const LoginPage: React.FC = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Login />
+    </Suspense>
+  );
+};
+
+export default LoginPage;
