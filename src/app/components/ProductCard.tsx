@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import Zoom from 'react-medium-image-zoom';
 import 'react-medium-image-zoom/dist/styles.css';
-import Image from 'next/image';
 import { Perfume } from '@/app/types/Product';
 import { useCart } from '@/app/context/CartContext';
 
@@ -17,7 +16,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart } = useCart();
 
   // Función para decodificar el JWT
-  function parseJwt(token: string): unknown | null {
+  function parseJwt(token: string): any | null {
     try {
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -28,7 +27,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           .join('')
       );
       return JSON.parse(jsonPayload);
-    } catch {
+    } catch (e) {
       return null;
     }
   }
@@ -36,7 +35,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   useEffect(() => {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (token) {
-      const payload = parseJwt(token) as { role?: string } | null;
+      const payload = parseJwt(token);
       if (
         payload &&
         (payload.role === 'Usuario' || payload.role === 'Admin' || payload.role === 'Superadmin')
@@ -50,14 +49,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     <div className="relative bg-white rounded-lg shadow-lg overflow-hidden w-full md:w-64">
       <Zoom>
         {product.imagenUrl ? (
-          <div className="relative w-full h-full" style={{ height: '100%' }}>
-            <Image
-              src={product.imagenUrl}
-              alt={product.modelo}
-              fill
-              className="object-cover"
-            />
-          </div>
+          <img
+            src={product.imagenUrl}
+            alt={product.modelo}
+            className="w-full h-full object-cover"
+            style={{ height: '100%' }}
+          />
         ) : (
           <div className="w-full h-64 bg-gray-300 flex items-center justify-center">
             <span className="text-gray-500">Sin imagen</span>

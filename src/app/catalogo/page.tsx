@@ -58,7 +58,7 @@ const Catalogo: React.FC = () => {
 
       {/* Contenido principal */}
       <div className="pt-32 p-4 bg-gray-800 min-h-screen">
-        <h1 className="text-4xl font-bold text-center mb-8 text-white">Catálogo</h1>
+        {/* <h1 className="text-4xl font-bold text-center mb-8 text-white">Catálogo</h1> */}
         <div className="grid grid-cols-1 gap-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
           {products.map((product) => (
             <ProductCard
