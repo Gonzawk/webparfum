@@ -70,7 +70,6 @@ const Catalogo: React.FC = () => {
             <ProductCard
               key={product.perfumeId}
               product={product}
-              onAddToCart={handleAddToCart}
             />
           ))}
         </div>
