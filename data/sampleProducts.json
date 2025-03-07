@@ -1,0 +1,28 @@
+[
+  {
+    "perfumeId": 1,
+    "marcaId": 1,
+    "marca": "Marca A",
+    "modelo": "Perfume A",
+    "precioMinorista": 59.99,
+    "precioMayorista": 49.99,
+    "genero": "Masculino",
+    "descripcion": "Fragancia elegante para ocasiones especiales.",
+    "volumen": 100,
+    "stock": 20,
+    "imagenURL": "/images/perfume-a.jpg"
+  },
+  {
+    "perfumeId": 2,
+    "marcaId": 2,
+    "marca": "Marca B",
+    "modelo": "Perfume B",
+    "precioMinorista": 39.99,
+    "precioMayorista": 29.99,
+    "genero": "Femenino",
+    "descripcion": "Aroma fresco para el día a día.",
+    "volumen": 80,
+    "stock": 15,
+    "imagenURL": "/images/perfume-b.jpg"
+  }
+]
