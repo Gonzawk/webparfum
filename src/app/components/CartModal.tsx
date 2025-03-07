@@ -104,7 +104,7 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
     };
 
     try {
-      const res = await fetch("http://localhost:5200/api/ventas/confirmar-compra", {
+      const res = await fetch("https://wksolutions.somee.com/api/ventas/confirmar-compra", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

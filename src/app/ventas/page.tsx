@@ -68,7 +68,7 @@ const Ventas: React.FC = () => {
     if (role !== 'Superadmin') {
       setActiveTab('asignadas');
     }
-    fetch('http://localhost:5200/api/ventas/lista')
+    fetch('https://wksolutions.somee.com/api/ventas/lista')
       .then((res) => res.json())
       .then((data) => setSales(data))
       .catch((err) => setError('Error al cargar las ventas: ' + (err instanceof Error ? err.message : err)));
@@ -90,9 +90,9 @@ const Ventas: React.FC = () => {
   // Función para confirmar o finalizar la venta según el estado actual
   const confirmSale = async (ventaId: number, currentEstado: string) => {
     if (!currentUserId) return;
-    let endpoint = `http://localhost:5200/api/ventas/${ventaId}/confirmar?adminId=${currentUserId}`;
+    let endpoint = `https://wksolutions.somee.com/api/ventas/${ventaId}/confirmar?adminId=${currentUserId}`;
     if (currentEstado.toLowerCase() === 'confirmado') {
-      endpoint = `http://localhost:5200/api/ventas/${ventaId}/finalizar?adminId=${currentUserId}`;
+      endpoint = `https://wksolutions.somee.com/api/ventas/${ventaId}/finalizar?adminId=${currentUserId}`;
     }
     try {
       const res = await fetch(endpoint, {

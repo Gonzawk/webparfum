@@ -40,7 +40,7 @@ const Registro: React.FC = () => {
 
     try {
       // Llamada al endpoint de tu API ASP.NET Core
-      const response = await fetch('http://localhost:5200/api/Usuarios/register', {
+      const response = await fetch('https://wksolutions.somee.com/api/Usuarios/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -53,7 +53,7 @@ const MisDatos: React.FC = () => {
       setError("Token inválido.");
       return;
     }
-    fetch(`http://localhost:5200/api/usuarios/misdatos/${userId}`)
+    fetch(`https://wksolutions.somee.com/api/usuarios/misdatos/${userId}`)
       .then((res) => res.json())
       .then((data) => {
         setUserData(data);
@@ -75,7 +75,7 @@ const MisDatos: React.FC = () => {
       newEmail: email
     };
     try {
-      const res = await fetch(`http://localhost:5200/api/usuarios/misdatos/${userData?.usuarioId}`, {
+      const res = await fetch(`https://wksolutions.somee.com/api/usuarios/misdatos/${userData?.usuarioId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'

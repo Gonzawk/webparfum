@@ -26,7 +26,7 @@ const Catalogo: React.FC = () => {
     const interval = setInterval(checkAuth, 500);
 
     // Cargar productos desde el endpoint
-    fetch('http://localhost:5200/api/products')
+    fetch('https://wksolutions.somee.com/api/products')
       .then((res) => res.json())
       .then((data) => setProducts(data))
       .catch((error) => console.error('Error fetching products', error));

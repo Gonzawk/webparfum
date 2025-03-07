@@ -61,7 +61,7 @@ const MisCompras: React.FC = () => {
     }
     // Se asume que el endpoint del backend es:
     // GET http://localhost:5200/api/compras/miscompras/{userId}
-    fetch(`http://localhost:5200/api/compras/miscompras/${userId}`)
+    fetch(`https://wksolutions.somee.com/api/compras/miscompras/${userId}`)
       .then((res) => res.json())
       .then((data) => setPurchases(data))
       .catch((err) => setError('Error al cargar tus compras: ' + err.message));

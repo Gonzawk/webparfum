@@ -42,12 +42,12 @@ const Productos: React.FC = () => {
 
   // Cargar marcas y productos al montar el componente
   useEffect(() => {
-    fetch('http://localhost:5200/api/Marca')
+    fetch('https://wksolutions.somee.com/api/Marca')
       .then((res) => res.json())
       .then((data) => setBrands(data))
       .catch((err) => console.error('Error fetching brands', err));
 
-    fetch('http://localhost:5200/api/products')
+    fetch('https://wksolutions.somee.com/api/products')
       .then((res) => res.json())
       .then((data) => setProducts(data))
       .catch((err) => console.error('Error fetching products', err));
@@ -57,7 +57,7 @@ const Productos: React.FC = () => {
   const handleAddBrand = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://localhost:5200/api/Marca', {
+      const res = await fetch('https://wksolutions.somee.com/api/Marca', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombre: brandName }),
@@ -81,7 +81,7 @@ const Productos: React.FC = () => {
 
   const handleDeleteBrand = async (marcaId: number) => {
     try {
-      const res = await fetch(`http://localhost:5200/api/Marca/${marcaId}`, {
+      const res = await fetch(`https://wksolutions.somee.com/api/Marca/${marcaId}`, {
         method: 'DELETE',
       });
       if (res.ok) {
@@ -113,7 +113,7 @@ const Productos: React.FC = () => {
       };
       if (editingProductId === null) {
         // Crear producto
-        const res = await fetch('http://localhost:5200/api/products', {
+        const res = await fetch('https://wksolutions.somee.com/api/products', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
@@ -128,7 +128,7 @@ const Productos: React.FC = () => {
         }
       } else {
         // Actualizar producto
-        const res = await fetch(`http://localhost:5200/api/products/${editingProductId}`, {
+        const res = await fetch(`https://wksolutions.somee.com/api/products/${editingProductId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...payload, perfumeId: editingProductId }),
@@ -185,7 +185,7 @@ const Productos: React.FC = () => {
 
   const handleDeleteProduct = async (id: number) => {
     try {
-      const res = await fetch(`http://localhost:5200/api/products/${id}`, {
+      const res = await fetch(`https://wksolutions.somee.com/api/products/${id}`, {
         method: 'DELETE',
       });
       if (res.ok) {
