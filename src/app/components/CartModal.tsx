@@ -31,7 +31,7 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
 
   // Cargar administradores desde el endpoint
   useEffect(() => {
-    fetch("http://localhost:5200/api/Ventas/admins")
+    fetch("https://wksolutions.somee.com/api/Ventas/admins")
       .then((res) => res.json())
       .then((data: Admin[]) => {
         setAdmins(data);
