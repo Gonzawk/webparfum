@@ -22,6 +22,10 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
 
+  // Calcular la cantidad total de productos en el carrito y determinar si se usa precio mayorista
+  const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
+  const useWholesalePrice = totalQuantity >= 10;
+
   // Función para mostrar toast
   const showToastMessage = (message: string) => {
     setToastMessage(message);
@@ -42,11 +46,15 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
       .catch((err) => console.error("Error fetching admins:", err));
   }, []);
 
-  // Función para calcular el total del carrito
+  // Función para calcular el total del carrito usando el precio mayorista si corresponde
   const calculateTotal = () => {
     return cart.reduce(
       (acc: number, item: CartItem) =>
-        acc + item.quantity * item.product.precioMinorista,
+        acc +
+        item.quantity *
+          (useWholesalePrice
+            ? item.product.precioMayorista
+            : item.product.precioMinorista),
       0
     );
   };
@@ -81,7 +89,7 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
     return payload?.nameid ? Number(payload.nameid) : payload?.sub ? Number(payload.sub) : null;
   };
 
-  // Función para confirmar la compra
+  // Función para confirmar la compra usando el precio mayorista si corresponde
   const handleConfirmPurchase = async () => {
     setPurchaseMessage("");
     const usuarioId = getUserIdFromToken();
@@ -99,7 +107,9 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
       items: cart.map((item) => ({
         perfumeId: item.product.perfumeId,
         cantidad: item.quantity,
-        precioUnitario: item.product.precioMinorista,
+        precioUnitario: useWholesalePrice
+          ? item.product.precioMayorista
+          : item.product.precioMinorista,
       })),
     };
 
@@ -156,54 +166,59 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
           <p className="text-black text-center">Tu carrito está vacío.</p>
         ) : (
           <div className="space-y-4">
-            {cart.map((item: CartItem) => (
-              <div
-                key={item.product.perfumeId}
-                className="flex flex-col sm:flex-row items-center border border-gray-300 rounded p-4"
-              >
-                <div className="w-16 h-16 flex-shrink-0 relative">
-                  {item.product.imagenUrl ? (
-                    <Image
-                      src={item.product.imagenUrl}
-                      alt={item.product.modelo}
-                      fill
-                      className="object-cover"
+            {cart.map((item: CartItem) => {
+              const effectivePrice = useWholesalePrice
+                ? item.product.precioMayorista
+                : item.product.precioMinorista;
+              return (
+                <div
+                  key={item.product.perfumeId}
+                  className="flex flex-col sm:flex-row items-center border border-gray-300 rounded p-4"
+                >
+                  <div className="w-16 h-16 flex-shrink-0 relative">
+                    {item.product.imagenUrl ? (
+                      <Image
+                        src={item.product.imagenUrl}
+                        alt={item.product.modelo}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+                        <span className="text-sm text-gray-500">Sin imagen</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-grow sm:ml-4 mt-2 sm:mt-0">
+                    <h3 className="text-lg font-bold text-black">{item.product.modelo}</h3>
+                    <p className="text-sm text-black">Precio: ${effectivePrice.toFixed(2)}</p>
+                    <p className="text-sm text-black">
+                      Subtotal: ${(item.quantity * effectivePrice).toFixed(2)}
+                    </p>
+                  </div>
+                  <div className="mt-2 sm:mt-0 flex items-center">
+                    <input
+                      type="number"
+                      min="1"
+                      value={item.quantity}
+                      onChange={(e) =>
+                        handleQuantityChange(item.product.perfumeId, Number(e.target.value))
+                      }
+                      className="w-16 border rounded text-black px-1 py-0.5"
                     />
-                  ) : (
-                    <div className="w-full h-full bg-gray-300 flex items-center justify-center">
-                      <span className="text-sm text-gray-500">Sin imagen</span>
-                    </div>
-                  )}
+                    <button
+                      onClick={() => {
+                        removeFromCart(item.product.perfumeId);
+                        showToastMessage("Producto eliminado correctamente.");
+                      }}
+                      className="ml-2 bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
                 </div>
-                <div className="flex-grow sm:ml-4 mt-2 sm:mt-0">
-                  <h3 className="text-lg font-bold text-black">{item.product.modelo}</h3>
-                  <p className="text-sm text-black">Precio: ${item.product.precioMinorista.toFixed(2)}</p>
-                  <p className="text-sm text-black">
-                    Subtotal: ${(item.quantity * item.product.precioMinorista).toFixed(2)}
-                  </p>
-                </div>
-                <div className="mt-2 sm:mt-0 flex items-center">
-                  <input
-                    type="number"
-                    min="1"
-                    value={item.quantity}
-                    onChange={(e) =>
-                      handleQuantityChange(item.product.perfumeId, Number(e.target.value))
-                    }
-                    className="w-16 border rounded text-black px-1 py-0.5"
-                  />
-                  <button
-                    onClick={() => {
-                      removeFromCart(item.product.perfumeId);
-                      showToastMessage("Producto eliminado correctamente.");
-                    }}
-                    className="ml-2 bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
         <div className="mt-4 text-right font-bold text-black">

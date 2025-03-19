@@ -106,6 +106,15 @@ const Productos: React.FC = () => {
       setError('Por favor, selecciona una marca.');
       return;
     }
+    // Validación para que no se envíen los campos con valor 0
+    if (
+      modelDetails.precioMinorista === 0 ||
+      modelDetails.precioMayorista === 0 ||
+      modelDetails.volumen === 0
+    ) {
+      setError('Los campos Precio Minorista, Precio Mayorista y Volumen deben tener un valor mayor a 0.');
+      return;
+    }
     try {
       const payload = {
         ...modelDetails,
@@ -292,9 +301,12 @@ const Productos: React.FC = () => {
                   <label className="block mb-1 text-gray-800">Precio Minorista</label>
                   <input
                     type="number"
-                    value={modelDetails.precioMinorista}
+                    value={modelDetails.precioMinorista === 0 ? '' : modelDetails.precioMinorista}
                     onChange={(e) =>
-                      setModelDetails({ ...modelDetails, precioMinorista: Number(e.target.value) })
+                      setModelDetails({ 
+                        ...modelDetails, 
+                        precioMinorista: e.target.value === '' ? 0 : Number(e.target.value) 
+                      })
                     }
                     className="w-full border border-gray-300 rounded px-4 py-2 text-gray-800"
                     required
@@ -304,9 +316,12 @@ const Productos: React.FC = () => {
                   <label className="block mb-1 text-gray-800">Precio Mayorista</label>
                   <input
                     type="number"
-                    value={modelDetails.precioMayorista}
+                    value={modelDetails.precioMayorista === 0 ? '' : modelDetails.precioMayorista}
                     onChange={(e) =>
-                      setModelDetails({ ...modelDetails, precioMayorista: Number(e.target.value) })
+                      setModelDetails({ 
+                        ...modelDetails, 
+                        precioMayorista: e.target.value === '' ? 0 : Number(e.target.value) 
+                      })
                     }
                     className="w-full border border-gray-300 rounded px-4 py-2 text-gray-800"
                     required
@@ -341,9 +356,12 @@ const Productos: React.FC = () => {
                   <label className="block mb-1 text-gray-800">Volumen (ml)</label>
                   <input
                     type="number"
-                    value={modelDetails.volumen}
+                    value={modelDetails.volumen === 0 ? '' : modelDetails.volumen}
                     onChange={(e) =>
-                      setModelDetails({ ...modelDetails, volumen: Number(e.target.value) })
+                      setModelDetails({ 
+                        ...modelDetails, 
+                        volumen: e.target.value === '' ? 0 : Number(e.target.value) 
+                      })
                     }
                     className="w-full border border-gray-300 rounded px-4 py-2 text-gray-800"
                     required
@@ -353,9 +371,12 @@ const Productos: React.FC = () => {
                   <label className="block mb-1 text-gray-800">Stock</label>
                   <input
                     type="number"
-                    value={modelDetails.stock}
+                    value={modelDetails.stock === 0 ? '' : modelDetails.stock}
                     onChange={(e) =>
-                      setModelDetails({ ...modelDetails, stock: Number(e.target.value) })
+                      setModelDetails({ 
+                        ...modelDetails, 
+                        stock: e.target.value === '' ? 0 : Number(e.target.value) 
+                      })
                     }
                     className="w-full border border-gray-300 rounded px-4 py-2 text-gray-800"
                     required
