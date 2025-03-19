@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Perfumes Importados", // Cambia el título por el que desees
-  description: "Tu sitio de perfumes importados", // Opcional, modifica la descripción
+  description: "Sitio web de Perfumes Importados", // Opcional, modifica la descripción
   icons: {
     icon: "/Iconos.ico", // Asegúrate de tener el favicon en la carpeta public
   },
