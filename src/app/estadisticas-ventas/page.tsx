@@ -71,7 +71,7 @@ const EstadisticasVentas: React.FC = () => {
       const mensualesResponse = await fetch(`https://wksolutions.somee.com/api/estadisticas/ventasmensuales?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`);
       const mensualesData = await mensualesResponse.json();
       setVentasMensuales(mensualesData);
-    } catch (err) {
+    } catch {
       setError('Error al cargar los datos de estadísticas.');
     }
   };
@@ -79,6 +79,7 @@ const EstadisticasVentas: React.FC = () => {
   // Cargar datos al montar la página
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Configuración para el gráfico de Top Perfumes (Barras)
