@@ -13,16 +13,13 @@ const Catalogo: React.FC = () => {
   const [showCartModal, setShowCartModal] = useState<boolean>(false);
 
   useEffect(() => {
-    // Función para actualizar el estado de autenticación
+    // Actualizar estado de autenticación
     const checkAuth = () => {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       setIsAuthenticated(!!token);
     };
 
-    // Revisar la autenticación al montar el componente
     checkAuth();
-
-    // Actualizar periódicamente (cada 500 ms)
     const interval = setInterval(checkAuth, 500);
 
     // Cargar productos desde el endpoint
@@ -38,16 +35,16 @@ const Catalogo: React.FC = () => {
     <>
       <Navbar />
 
-      {/* Segundo navbar fijo para navegación de secciones */}
+      {/* Segundo navbar fijo */}
       <div className="fixed top-16 left-0 w-full bg-gray-800 shadow z-40">
         <div className="max-w-7xl mx-auto px-4 py-2 flex justify-center space-x-4">
-          <Link 
-            href="/catalogo" 
+          <Link
+            href="/catalogo"
             className="px-4 py-2 rounded-md font-medium transition-colors bg-gray-800 text-white border border-white"
           >
             Catálogo
           </Link>
-          <Link 
+          <Link
             href="/inicio#inicio"
             className="px-4 py-2 rounded-md font-medium transition-colors bg-gray-800 text-white border border-transparent hover:border-white"
           >
@@ -56,20 +53,19 @@ const Catalogo: React.FC = () => {
         </div>
       </div>
 
-      {/* Contenido principal */}
+      {/* Contenedor principal: se usa un contenedor flexible para mantener el tamaño de cada tarjeta */}
       <div className="pt-32 p-4 bg-gray-800 min-h-screen">
-        {/* <h1 className="text-4xl font-bold text-center mb-8 text-white">Catálogo</h1> */}
-        <div className="grid grid-cols-1 gap-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
-          {products.map((product) => (
-            <ProductCard
-              key={product.perfumeId}
-              product={product}
-            />
-          ))}
+        <div className="max-w-screen-xl mx-auto px-4">
+          <div className="flex flex-wrap justify-center gap-8">
+            {products.map((product) => (
+              <div key={product.perfumeId} className="w-full sm:w-80">
+                <ProductCard product={product} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Botón flotante del carrito, visible solo para usuarios autenticados */}
       {isAuthenticated && (
         <button
           onClick={() => setShowCartModal(true)}
@@ -93,7 +89,6 @@ const Catalogo: React.FC = () => {
         </button>
       )}
 
-      {/* Modal del carrito */}
       {showCartModal && <CartModal onClose={() => setShowCartModal(false)} />}
     </>
   );

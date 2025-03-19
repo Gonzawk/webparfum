@@ -21,7 +21,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [canAddToCart, setCanAddToCart] = useState(false);
   const { addToCart } = useCart();
 
-  // Función para decodificar el JWT
   function parseJwt(token: string): TokenPayload | null {
     try {
       const base64Url = token.split('.')[1];
@@ -55,7 +54,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     <div className="relative bg-white rounded-lg shadow-lg overflow-hidden w-full md:w-80">
       <Zoom>
         {product.imagenUrl ? (
-          // Se elimina el contenedor con aspect ratio fijo y se usa Next/Image con sus dimensiones intrínsecas.
           <div className="w-full">
             <Image
               src={product.imagenUrl}

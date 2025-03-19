@@ -12,7 +12,7 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl');
+  const callbackUrl = searchParams.get('callbackUrl'); // ya no se usará
   const { login } = useContext(AuthContext);
 
   const isValidEmail = (email: string): boolean => {
@@ -48,12 +48,8 @@ const Login: React.FC = () => {
       // Usar la función login del AuthContext para manejar el token
       login(data.token);
 
-      // Redirige a callbackUrl si se proporciona; si no, regresa a la página anterior
-      if (callbackUrl) {
-        router.push(callbackUrl);
-      } else {
-        router.back();
-      }
+      // Redirigir a /inicio siempre que la autenticación sea correcta
+      router.push('/inicio');
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(`Error en la solicitud: ${err.message}`);
@@ -65,7 +61,9 @@ const Login: React.FC = () => {
 
   return (
     <>
-      <div><h1 className='mt-3 mb-3 text-center'>PERFUMES IMPORTADOS</h1></div>
+      <div>
+        <h1 className="mt-3 mb-3 text-center">PERFUMES IMPORTADOS</h1>
+      </div>
       <div className="min-h-screen bg-gray-800 flex items-center justify-center py-8 px-4">
         <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
           <h1 className="text-2xl font-bold text-center mb-6 text-black">

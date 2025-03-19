@@ -71,7 +71,7 @@ const Navbar: React.FC = () => {
               className="inline-flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded"
               role="menuitem"
             >
-              Estadisiticas
+              Estadisticas
               <svg
                 className="ml-1 h-4 w-4"
                 xmlns="http://www.w3.org/2000/svg"
@@ -99,7 +99,7 @@ const Navbar: React.FC = () => {
                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   role="menuitem"
                 >
-                  Estadisticas de Compras
+                  Estadisticas de Admin
                 </Link>
               </div>
             )}
@@ -240,7 +240,7 @@ const Navbar: React.FC = () => {
             onClick={() => setIsMobileDropdownOpen(!isMobileDropdownOpen)}
             className="block w-full text-left px-3 py-2 text-base text-gray-300 hover:text-white hover:bg-gray-700 rounded"
           >
-            Estadisiticas
+            Estadisticas
           </button>
           {isMobileDropdownOpen && (
             <div className="pl-4">
@@ -254,7 +254,7 @@ const Navbar: React.FC = () => {
                 href="/estadisticas-compras"
                 className="block px-3 py-2 text-base text-gray-300 hover:text-white hover:bg-gray-700 rounded"
               >
-                Estadisticas de Compras
+                Estadisticas de Admin
               </Link>
             </div>
           )}

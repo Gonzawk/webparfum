@@ -37,8 +37,9 @@ interface VentasDiariasDTO {
   ingresosTotales: number;
 }
 
+// Aquí se cambia "anio" por "año" para que coincida con la respuesta del endpoint
 interface VentasMensualesDTO {
-  anio: number;
+  año: number;
   mes: number;
   totalVentas: number;
   ingresosTotales: number;
@@ -127,7 +128,7 @@ const EstadisticasVentas: React.FC = () => {
 
   // Configuración para el gráfico de Ventas Mensuales (Barras)
   const ventasMensualesChartData = {
-    labels: ventasMensuales.map(item => `${item.anio}-${item.mes}`),
+    labels: ventasMensuales.map(item => `${item.año}-${item.mes ?? 0}`),
     datasets: [
       {
         label: 'Ingresos Mensuales',

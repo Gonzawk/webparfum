@@ -10,13 +10,16 @@ interface SaleDetail {
   cantidad: number;
   precioUnitario: number;
   subtotal: number;
+  perfumeName?: string;
+  marca?: string;
 }
 
 interface Sale {
   ventaId: number;
   usuarioId: number;
   adminId: number;
-  adminName?: string; // Se espera que el endpoint retorne el nombre del admin (opcional)
+  clienteName?: string; // Para Admin: nombre del cliente
+  adminName?: string;   // Para Superadmin: nombre del administrador
   fechaCompra: string;
   total: number;
   estado: string;
@@ -33,7 +36,13 @@ const Ventas: React.FC = () => {
   const [userRole, setUserRole] = useState<string>('');
   const [purchaseMessage, setPurchaseMessage] = useState('');
 
-  // Función para decodificar el JWT y obtener el payload
+  // Filtros
+  const [filterName, setFilterName] = useState('');
+  const [filterEstado, setFilterEstado] = useState('');
+  const [filterStartDate, setFilterStartDate] = useState('');
+  const [filterEndDate, setFilterEndDate] = useState('');
+
+  // Decodificar JWT
   function parseJwt(token: string): unknown | null {
     try {
       const base64Url = token.split('.')[1];
@@ -50,7 +59,7 @@ const Ventas: React.FC = () => {
     }
   }
 
-  // Función para obtener el ID y el rol del usuario del token
+  // Obtener datos del usuario
   const getUserDataFromToken = useCallback((): { id: number | null; role: string } => {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (!token) return { id: null, role: '' };
@@ -64,14 +73,18 @@ const Ventas: React.FC = () => {
     const { id, role } = getUserDataFromToken();
     setCurrentUserId(id);
     setUserRole(role);
-    // Si el usuario no es Superadmin, forzamos la pestaña "Ventas Asignadas"
-    if (role !== 'Superadmin') {
-      setActiveTab('asignadas');
-    }
-    fetch('https://wksolutions.somee.com/api/ventas/lista')
+    // Para Admin se utiliza el endpoint "lista-completa" (datos extendidos) y para Superadmin "lista"
+    const endpoint =
+      role !== 'Superadmin'
+        ? (setActiveTab('asignadas'), 'https://wksolutions.somee.com/api/ventas/lista-completa')
+        : 'https://wksolutions.somee.com/api/ventas/lista';
+
+    fetch(endpoint)
       .then((res) => res.json())
       .then((data) => setSales(data))
-      .catch((err) => setError('Error al cargar las ventas: ' + (err instanceof Error ? err.message : err)));
+      .catch((err) =>
+        setError('Error al cargar las ventas: ' + (err instanceof Error ? err.message : err))
+      );
   }, [getUserDataFromToken]);
 
   const toggleSaleDetails = (ventaId: number) => {
@@ -82,12 +95,36 @@ const Ventas: React.FC = () => {
     setVisibleSalesCount(sales.length);
   };
 
-  // Ventas asignadas: filtrar aquellas cuyo adminId coincide con el ID del usuario logueado
+  // Para ventas asignadas
   const assignedSales = currentUserId !== null ? sales.filter(sale => sale.adminId === currentUserId) : [];
-  // La pestaña "Ventas" muestra todas las ventas (solo para Superadmin) y "Ventas Asignadas" para Admin
-  const salesToDisplay = activeTab === 'ventas' ? sales.slice(0, visibleSalesCount) : assignedSales;
+  const baseSales = activeTab === 'ventas' ? sales : assignedSales;
 
-  // Función para confirmar o finalizar la venta según el estado actual
+  // Aplicar filtros
+  const filteredSales = baseSales.filter(sale => {
+    // Filtrar por nombre: para Superadmin se usa adminName, para Admin se usa clienteName
+    const nameField = userRole === 'Superadmin'
+      ? sale.adminName || sale.adminId.toString()
+      : sale.clienteName || sale.usuarioId.toString();
+    if (filterName && !nameField.toLowerCase().includes(filterName.toLowerCase())) {
+      return false;
+    }
+    // Filtrar por estado
+    if (filterEstado && sale.estado.toLowerCase() !== filterEstado.toLowerCase()) {
+      return false;
+    }
+    // Filtrar por fechas
+    const saleDate = new Date(sale.fechaCompra);
+    if (filterStartDate && saleDate < new Date(filterStartDate)) {
+      return false;
+    }
+    if (filterEndDate && saleDate > new Date(filterEndDate)) {
+      return false;
+    }
+    return true;
+  });
+
+  const salesToDisplay = filteredSales.slice(0, visibleSalesCount);
+
   const confirmSale = async (ventaId: number, currentEstado: string) => {
     if (!currentUserId) return;
     let endpoint = `https://wksolutions.somee.com/api/ventas/${ventaId}/confirmar?adminId=${currentUserId}`;
@@ -114,7 +151,6 @@ const Ventas: React.FC = () => {
               ? 'Venta finalizada exitosamente.'
               : 'Venta confirmada exitosamente.')
         );
-        // Ocultar el mensaje automáticamente después de 5 segundos
         setTimeout(() => {
           setPurchaseMessage('');
         }, 5000);
@@ -148,26 +184,57 @@ const Ventas: React.FC = () => {
             {purchaseMessage}
           </div>
         )}
-        <div className="flex justify-center space-x-4 mb-4">
-          {userRole === 'Superadmin' && (
-            <button
-              onClick={() => setActiveTab('ventas')}
-              className={`px-4 py-2 rounded-md font-medium ${
-                activeTab === 'ventas' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'
-              }`}
-            >
-              Ventas
-            </button>
-          )}
-          <button
-            onClick={() => setActiveTab('asignadas')}
-            className={`px-4 py-2 rounded-md font-medium ${
-              activeTab === 'asignadas' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'
-            }`}
-          >
-            Ventas Asignadas
-          </button>
+
+        {/* Sección de filtros: Contenedor con fondo blanco y ancho igual al de la lista */}
+        <div className="max-w-7xl mx-auto bg-white rounded-lg p-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-black">
+                {userRole === 'Superadmin' ? 'Administrador' : 'Nombre de Usuario'}
+              </label>
+              <input
+                type="text"
+                value={filterName}
+                onChange={(e) => setFilterName(e.target.value)}
+                className="mt-1 block w-full border-gray-300 rounded-md bg-white text-black"
+                placeholder="Buscar..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-black">Estado</label>
+              <select
+                value={filterEstado}
+                onChange={(e) => setFilterEstado(e.target.value)}
+                className="mt-1 block w-full border-gray-300 rounded-md bg-white text-black"
+              >
+                <option value="">Todos</option>
+                <option value="Pendiente">Pendiente</option>
+                <option value="Confirmado">Confirmado</option>
+                <option value="Completado">Completado</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-black">Fecha Inicio</label>
+              <input
+                type="date"
+                value={filterStartDate}
+                onChange={(e) => setFilterStartDate(e.target.value)}
+                className="mt-1 block w-full border-gray-300 rounded-md bg-white text-black"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-black">Fecha Fin</label>
+              <input
+                type="date"
+                value={filterEndDate}
+                onChange={(e) => setFilterEndDate(e.target.value)}
+                className="mt-1 block w-full border-gray-300 rounded-md bg-white text-black"
+              />
+            </div>
+          </div>
         </div>
+
+        {/* Lista de ventas */}
         <div className="max-w-7xl mx-auto bg-white rounded-lg shadow p-4 overflow-y-auto" style={{ maxHeight: '60vh' }}>
           {/* Encabezados fijos */}
           <div className="grid grid-cols-2 sm:grid-cols-7 gap-2 sm:gap-4 font-bold border-b pb-2 text-black">
@@ -176,7 +243,9 @@ const Ventas: React.FC = () => {
             <div className="hidden sm:block">Fecha</div>
             <div className="hidden sm:block">Total</div>
             <div className="hidden sm:block">Estado</div>
-            <div className="hidden sm:block">Administrador</div>
+            <div className="hidden sm:block">
+              {userRole === 'Superadmin' ? 'Administrador' : 'Cliente'}
+            </div>
             <div className="hidden sm:block">Acciones</div>
             <div className="sm:hidden">Resumen</div>
           </div>
@@ -196,7 +265,11 @@ const Ventas: React.FC = () => {
                   <div className="text-center">{new Date(sale.fechaCompra).toLocaleDateString()}</div>
                   <div className="text-center">${sale.total.toFixed(2)}</div>
                   <div className="text-center">{sale.estado}</div>
-                  <div className="text-center">{sale.adminName ? sale.adminName : sale.adminId}</div>
+                  <div className="text-center">
+                    {userRole === 'Superadmin'
+                      ? sale.adminName ? sale.adminName : sale.adminId
+                      : sale.clienteName ? sale.clienteName : sale.usuarioId}
+                  </div>
                   <div className="text-center flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-2">
                     <button
                       onClick={() => toggleSaleDetails(sale.ventaId)}
@@ -205,12 +278,15 @@ const Ventas: React.FC = () => {
                       {expandedSaleId === sale.ventaId ? 'Ocultar Detalles' : 'Ver Detalles'}
                     </button>
                     {activeTab === 'asignadas' &&
-                      (sale.estado.toLowerCase() === 'pendiente' || sale.estado.toLowerCase() === 'confirmado') && (
+                      (sale.estado.toLowerCase() === 'pendiente' ||
+                        sale.estado.toLowerCase() === 'confirmado') && (
                         <button
                           onClick={() => confirmSale(sale.ventaId, sale.estado)}
                           className="bg-green-500 text-white px-3 py-1 rounded"
                         >
-                          {sale.estado.toLowerCase() === 'confirmado' ? 'Cerrar Venta' : 'Confirmar'}
+                          {sale.estado.toLowerCase() === 'confirmado'
+                            ? 'Cerrar Venta'
+                            : 'Confirmar'}
                         </button>
                       )}
                   </div>
@@ -229,12 +305,15 @@ const Ventas: React.FC = () => {
                         {expandedSaleId === sale.ventaId ? 'Ocultar' : 'Ver'}
                       </button>
                       {activeTab === 'asignadas' &&
-                        (sale.estado.toLowerCase() === 'pendiente' || sale.estado.toLowerCase() === 'confirmado') && (
+                        (sale.estado.toLowerCase() === 'pendiente' ||
+                          sale.estado.toLowerCase() === 'confirmado') && (
                           <button
                             onClick={() => confirmSale(sale.ventaId, sale.estado)}
                             className="bg-green-500 text-white px-2 py-1 rounded text-xs"
                           >
-                            {sale.estado.toLowerCase() === 'confirmado' ? 'Cerrar Venta' : 'Confirmar'}
+                            {sale.estado.toLowerCase() === 'confirmado'
+                              ? 'Cerrar Venta'
+                              : 'Confirmar'}
                           </button>
                         )}
                     </div>
@@ -250,7 +329,10 @@ const Ventas: React.FC = () => {
                       <strong>Estado:</strong> {sale.estado}
                     </p>
                     <p>
-                      <strong>Admin:</strong> {sale.adminName ? sale.adminName : sale.adminId}
+                      <strong>{userRole === 'Superadmin' ? 'Administrador' : 'Cliente'}:</strong>{' '}
+                      {userRole === 'Superadmin'
+                        ? sale.adminName ? sale.adminName : sale.adminId
+                        : sale.clienteName ? sale.clienteName : sale.usuarioId}
                     </p>
                   </div>
                 </div>
@@ -262,7 +344,14 @@ const Ventas: React.FC = () => {
                         <table className="min-w-full text-left mt-2 text-black">
                           <thead>
                             <tr className="bg-gray-200">
-                              <th className="px-3 py-1 border">Producto ID</th>
+                              {(userRole === 'Superadmin' || userRole === 'Admin') ? (
+                                <>
+                                  <th className="px-3 py-1 border">Producto</th>
+                                  <th className="px-3 py-1 border">Marca</th>
+                                </>
+                              ) : (
+                                <th className="px-3 py-1 border">Producto ID</th>
+                              )}
                               <th className="px-3 py-1 border">Cantidad</th>
                               <th className="px-3 py-1 border">Precio Unitario</th>
                               <th className="px-3 py-1 border">Subtotal</th>
@@ -271,7 +360,14 @@ const Ventas: React.FC = () => {
                           <tbody>
                             {sale.detalles.map((detail) => (
                               <tr key={detail.ventaDetalleId} className="hover:bg-gray-100">
-                                <td className="px-3 py-1 border text-center">{detail.perfumeId}</td>
+                                {(userRole === 'Superadmin' || userRole === 'Admin') ? (
+                                  <>
+                                    <td className="px-3 py-1 border text-center">{detail.perfumeName}</td>
+                                    <td className="px-3 py-1 border text-center">{detail.marca}</td>
+                                  </>
+                                ) : (
+                                  <td className="px-3 py-1 border text-center">{detail.perfumeId}</td>
+                                )}
                                 <td className="px-3 py-1 border text-center">{detail.cantidad}</td>
                                 <td className="px-3 py-1 border text-center">${detail.precioUnitario.toFixed(2)}</td>
                                 <td className="px-3 py-1 border text-center">${detail.subtotal.toFixed(2)}</td>
@@ -288,7 +384,7 @@ const Ventas: React.FC = () => {
               </div>
             ))
           )}
-          {activeTab === 'ventas' && sales.length > visibleSalesCount && (
+          {activeTab === 'ventas' && filteredSales.length > visibleSalesCount && (
             <div className="text-center mt-4">
               <button onClick={handleLoadMore} className="bg-green-500 text-white px-4 py-2 rounded">
                 Ver Más
