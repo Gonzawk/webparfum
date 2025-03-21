@@ -340,7 +340,7 @@ const Navbar: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo y título */}
           <div className="flex items-center">
-            <Link href="/">
+            <Link href="/inicio">
               <span className="text-white font-bold text-xl">Perfumes Importados</span>
             </Link>
           </div>

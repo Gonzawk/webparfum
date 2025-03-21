@@ -41,7 +41,7 @@ const Usuarios: React.FC = () => {
 
   // Cargar usuarios al montar el componente
   useEffect(() => {
-    fetch('https://wksolutions.somee.com/api/usuarios')
+    fetch('https://www.perfumesadoss.com/api/usuarios')
       .then((res) => res.json())
       .then((data) => setUsuarios(data))
       .catch((err) => console.error('Error fetching usuarios', err));
@@ -63,7 +63,7 @@ const Usuarios: React.FC = () => {
   // Función para borrar un usuario
   const handleDeleteUsuario = async (id: number) => {
     try {
-      const res = await fetch(`https://wksolutions.somee.com/api/usuarios/${id}`, {
+      const res = await fetch(`https://www.perfumesadoss.com/api/usuarios/${id}`, {
         method: 'DELETE'
       });
       if (res.ok) {
@@ -92,7 +92,7 @@ const Usuarios: React.FC = () => {
         password: newUsuario.password,
         roleName: newUsuario.rol
       };
-      const res = await fetch('https://wksolutions.somee.com/api/Usuarios/createByAdmin', {
+      const res = await fetch('https://www.perfumesadoss.com/api/Usuarios/createByAdmin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -142,7 +142,7 @@ const Usuarios: React.FC = () => {
           <div className="fixed top-4 right-4 bg-white border border-gray-300 rounded-lg shadow-lg px-6 py-4 z-50">
             <div className="flex items-center">
               <Image
-                src="https://i.ibb.co/0r1bLZr/verification.png"
+                src="https://i.ibb.co/bgVxMWhC/confirmation-1152155-960-720.webp"
                 alt="Confirmación"
                 width={40}
                 height={40}

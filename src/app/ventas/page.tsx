@@ -76,8 +76,8 @@ const Ventas: React.FC = () => {
     // Para Admin se utiliza el endpoint "lista-completa" (datos extendidos) y para Superadmin "lista"
     const endpoint =
       role !== 'Superadmin'
-        ? (setActiveTab('asignadas'), 'https://wksolutions.somee.com/api/ventas/lista-completa')
-        : 'https://wksolutions.somee.com/api/ventas/lista';
+        ? (setActiveTab('asignadas'), 'https://www.perfumesadoss.com/api/ventas/lista-completa')
+        : 'https://www.perfumesadoss.com/api/ventas/lista';
 
     fetch(endpoint)
       .then((res) => res.json())
@@ -127,9 +127,9 @@ const Ventas: React.FC = () => {
 
   const confirmSale = async (ventaId: number, currentEstado: string) => {
     if (!currentUserId) return;
-    let endpoint = `https://wksolutions.somee.com/api/ventas/${ventaId}/confirmar?adminId=${currentUserId}`;
+    let endpoint = `https://www.perfumesadoss.com/api/ventas/${ventaId}/confirmar?adminId=${currentUserId}`;
     if (currentEstado.toLowerCase() === 'confirmado') {
-      endpoint = `https://wksolutions.somee.com/api/ventas/${ventaId}/finalizar?adminId=${currentUserId}`;
+      endpoint = `https://www.perfumesadoss.com/api/ventas/${ventaId}/finalizar?adminId=${currentUserId}`;
     }
     try {
       const res = await fetch(endpoint, {

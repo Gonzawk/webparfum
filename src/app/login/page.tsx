@@ -30,7 +30,7 @@ const Login: React.FC = () => {
     }
 
     try {
-      const response = await fetch('https://wksolutions.somee.com/api/Auth/login', {
+      const response = await fetch('https://www.perfumesadoss.com/api/Auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -130,6 +130,12 @@ const Login: React.FC = () => {
               ¿Olvidaste tu contraseña?{' '}
               <Link href="/restablecer-clave" className="text-blue-500 hover:underline">
                 Restablecer
+              </Link>
+            </p>
+            <p className="mt-2 text-sm text-black">
+              {' '}
+              <Link href="/inicio" className="text-blue-500 hover:underline">
+                Inicio
               </Link>
             </p>
           </div>

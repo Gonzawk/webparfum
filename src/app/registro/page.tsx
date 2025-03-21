@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/app/components/Navbar';
+import Head from 'next/head';
 
 const Registro: React.FC = () => {
   const [nombreCompleto, setNombreCompleto] = useState('');
@@ -12,6 +13,7 @@ const Registro: React.FC = () => {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const isValidEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -31,7 +33,6 @@ const Registro: React.FC = () => {
       return;
     }
 
-    // Arma el cuerpo de la solicitud
     const body = {
       nombreCompleto,
       email,
@@ -39,8 +40,7 @@ const Registro: React.FC = () => {
     };
 
     try {
-      // Llamada al endpoint de tu API ASP.NET Core
-      const response = await fetch('https://wksolutions.somee.com/api/Usuarios/register', {
+      const response = await fetch('https://www.perfumesadoss.com/api/Usuarios/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -56,8 +56,13 @@ const Registro: React.FC = () => {
 
       const result = await response.json();
       console.log('Usuario registrado:', result);
-      // Muestra un mensaje de éxito, limpia campos o redirige a otra página
-      alert(`Registro exitoso. ID de usuario: ${result.UsuarioId}`);
+      // Limpia los campos
+      setNombreCompleto('');
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
+      // Muestra el modal de confirmación
+      setShowModal(true);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(`Error en la solicitud: ${err.message}`);
@@ -69,6 +74,9 @@ const Registro: React.FC = () => {
 
   return (
     <>
+      <Head>
+        <title>Registrarse</title>
+      </Head>
       <Navbar />
       <div className="min-h-screen bg-gray-800 flex items-center justify-center py-8 px-4">
         <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
@@ -119,7 +127,7 @@ const Registro: React.FC = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
                 >
-                  {/* Íconos para mostrar/ocultar */}
+                  {showPassword ? 'Ocultar' : 'Mostrar'}
                 </button>
               </div>
             </div>
@@ -141,7 +149,7 @@ const Registro: React.FC = () => {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
                 >
-                  {/* Íconos para mostrar/ocultar */}
+                  {showConfirmPassword ? 'Ocultar' : 'Mostrar'}
                 </button>
               </div>
             </div>
@@ -162,6 +170,29 @@ const Registro: React.FC = () => {
           </div>
         </div>
       </div>
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm mx-auto text-center">
+            <img
+              src="https://i.ibb.co/bgVxMWhC/confirmation-1152155-960-720.webp"
+              alt="Confirmación"
+              className="w-24 h-24 mx-auto mb-4"
+            />
+            <h2 className="text-2xl font-bold text-black mb-4">
+              Usuario Registrado.
+            </h2>
+            <p className="text-black mb-4">
+              Verifique su correo para poder ingresar a su cuenta.
+            </p>
+            <button
+              onClick={() => setShowModal(false)}
+              className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded transition-colors"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 };

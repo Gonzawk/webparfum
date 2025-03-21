@@ -57,19 +57,19 @@ const EstadisticasVentas: React.FC = () => {
   const fetchData = async () => {
     setError('');
     try {
-      const resumenResponse = await fetch(`https://wksolutions.somee.com/api/estadisticas/resumen?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`);
+      const resumenResponse = await fetch(`https://www.perfumesadoss.com/api/estadisticas/resumen?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`);
       const resumenData = await resumenResponse.json();
       setResumen(resumenData);
 
-      const topResponse = await fetch(`https://wksolutions.somee.com/api/estadisticas/topperfumes?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&top=10`);
+      const topResponse = await fetch(`https://www.perfumesadoss.com/api/estadisticas/topperfumes?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&top=10`);
       const topData = await topResponse.json();
       setTopPerfumes(topData);
 
-      const diariasResponse = await fetch(`https://wksolutions.somee.com/api/estadisticas/ventasdiarias?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`);
+      const diariasResponse = await fetch(`https://www.perfumesadoss.com/api/estadisticas/ventasdiarias?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`);
       const diariasData = await diariasResponse.json();
       setVentasDiarias(diariasData);
 
-      const mensualesResponse = await fetch(`https://wksolutions.somee.com/api/estadisticas/ventasmensuales?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`);
+      const mensualesResponse = await fetch(`https://www.perfumesadoss.com/api/estadisticas/ventasmensuales?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`);
       const mensualesData = await mensualesResponse.json();
       setVentasMensuales(mensualesData);
     } catch {

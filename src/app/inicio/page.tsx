@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/app/components/Navbar';
 import Image from 'next/image';
+import SocialMedia from '@/app/components/SocialMedia';
 
 const Inicio: React.FC = () => {
   const [activeSection, setActiveSection] = useState<'inicio' | 'nosotros'>('inicio');
@@ -13,7 +14,7 @@ const Inicio: React.FC = () => {
       {/* Navbar principal */}
       <Navbar />
 
-      {/* Segundo navbar fijo para navegación de secciones con fondo consistente */}
+      {/* Segundo navbar fijo para navegación de secciones */}
       <div className="fixed top-16 left-0 w-full bg-gray-800 shadow z-40">
         <div className="max-w-7xl mx-auto px-4 py-2 flex justify-center space-x-4">
           <Link 
@@ -45,48 +46,126 @@ const Inicio: React.FC = () => {
         </div>
       </div>
 
-      {/* Contenido principal con fondo consistente */}
-      <div className="pt-32 p-4 bg-gray-800 min-h-screen">
+      {/* Contenido principal */}
+      <div className="min-h-screen bg-gray-900">
         {activeSection === 'inicio' && (
-          <div className="max-w-4xl mx-auto text-center">
-            <Image 
-              src="/logo.png" 
-              alt="Logo WebParfum" 
-              width={128}
-              height={128}
-              className="mx-auto mb-4 w-32 h-32 object-contain" 
-            />
-            <h1 className="text-4xl font-bold text-white">Bienvenido a WebParfum</h1>
-            <p className="mt-4 text-lg text-white">
-              Descubre nuestra exclusiva colección de perfumes importados, pensados para resaltar tu esencia.
-            </p>
-          </div>
-        )}
-        {activeSection === 'nosotros' && (
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl font-bold text-center text-white">Contacto y Nosotros</h1>
-            <p className="mt-4 text-lg text-center text-white">
-              Conoce nuestra historia, nuestros valores y cómo puedes contactarnos para obtener más información.
-            </p>
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-2xl font-bold mb-2">Nuestra Historia</h2>
-                <p className="text-gray-700">
-                  WebParfum nació con la pasión por la perfumería y la búsqueda de calidad. Descubre nuestra trayectoria y compromiso con la excelencia.
+          <div className="relative w-full h-screen">
+            {/* Imagen de fondo para escritorio */}
+            <div className="hidden md:block absolute inset-0">
+              <Image 
+                src="/header-image1.jpg"  // Imagen para escritorio (ideal ~2500x1500)
+                alt="Fondo de Perfumes - Escritorio"
+                fill
+                className="object-cover"
+              />
+            </div>
+            {/* Imagen de fondo para móvil */}
+            <div className="block md:hidden absolute inset-0">
+              <Image 
+                src="/header-image-mobile.png"  // Imagen para móvil (ideal ~1080x1920)
+                alt="Fondo de Perfumes - Móvil"
+                fill
+                className="object-cover"
+              />
+            </div>
+            {/* Contenido superpuesto centrado */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+              <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 animate-slideDown">
+                Bienvenido a Perfumes Importados
+              </h1>
+              {/* Versión escritorio: typewriter */}
+              <div className="hidden md:block">
+                <p className="text-2xl md:text-3xl text-white animate-typewriter overflow-hidden whitespace-nowrap border-r-4 border-white">
+                  Descubre nuestra exclusiva colección de fragancias para resaltar tu esencia.
                 </p>
               </div>
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-2xl font-bold mb-2">Contacto</h2>
-                <p className="text-gray-700">
-                  Teléfono: (123) 456-7890<br />
-                  Email: contacto@webparfum.com<br />
-                  Dirección: Av. Ejemplo 123, Ciudad, País.
+              {/* Versión móvil: fadeIn, con wrapping normal */}
+              <div className="block md:hidden">
+                <p className="text-2xl md:text-3xl text-white animate-fadeIn whitespace-normal">
+                  Descubre nuestra exclusiva colección de fragancias para resaltar tu esencia.
                 </p>
               </div>
             </div>
           </div>
         )}
+        {activeSection === 'nosotros' && (
+          <div className="relative w-full min-h-screen">
+            {/* Reutilizamos la misma imagen de fondo */}
+            <div className="hidden md:block absolute inset-0">
+              <Image 
+                src="/header-image1.jpg" 
+                alt="Fondo de Perfumes - Escritorio"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div className="block md:hidden absolute inset-0">
+              <Image 
+                src="/header-image-mobile.png" 
+                alt="Fondo de Perfumes - Móvil"
+                fill
+                className="object-cover"
+              />
+            </div>
+            {/* Contenido de la sección Nosotros */}
+            <div className="relative z-10 flex flex-col items-center justify-center px-4 py-16">
+              <div className="mb-15 md:mb-30"></div>
+              <div className="mb-4">
+                <SocialMedia />
+              </div>
+              <div className="bg-white p-8 rounded-2xl shadow-xl text-center w-full max-w-3xl border border-gray-200 mx-auto">
+                <h2 className="text-3xl font-semibold mb-4 text-gray-800">Información de Contacto</h2>
+                <p className="text-lg text-gray-800 mb-2"><strong>📞 Teléfono:</strong> +54 9 3515 55-2099</p>
+                <p className="text-lg text-gray-800 mb-2 break-words">
+                  <strong>📧 Email:</strong> <a href="mailto:perfumes.importados.777@perfumesadoss.com" className="text-blue-600 hover:underline break-words">perfumes.importados.777@perfumesadoss.com</a>
+                </p>
+                <p className="text-lg text-gray-800 mb-4"><strong>📍 Dirección:</strong> Corrientes 463, Centro - Córdoba, Argentina.</p>
+                <h2 className="text-3xl font-semibold mt-6 mb-4 text-gray-800">Ubicación</h2>
+                <div className="w-full h-64 rounded-lg overflow-hidden shadow-lg border border-gray-300">
+                  <iframe
+                    className="w-full h-full"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3404.7488294043883!2d-64.18193942363165!3d-31.421045574259466!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9432a29a6ece524f%3A0xd212fe80d8d57b17!2sCorrientes%20463%2C%20X5000%20C%C3%B3rdoba!5e0!3m2!1ses!2sar!4v1742517792998!5m2!1ses!2sar"
+                    allowFullScreen
+                    loading="lazy"
+                  ></iframe>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
+
+      <style jsx>{`
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-slideDown {
+          animation: slideDown 1s ease-out forwards;
+        }
+        @keyframes typewriter {
+          from { width: 0; }
+          to { width: 100%; }
+        }
+        .animate-typewriter {
+          animation: typewriter 3s steps(40) 1s 1 normal both;
+          overflow: hidden;
+          white-space: nowrap;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 1.5s ease-out forwards;
+        }
+      `}</style>
     </>
   );
 };

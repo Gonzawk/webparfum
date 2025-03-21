@@ -35,7 +35,7 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
 
   // Cargar administradores desde el endpoint
   useEffect(() => {
-    fetch("https://wksolutions.somee.com/api/Ventas/admins")
+    fetch("https://www.perfumesadoss.com/api/Ventas/admins")
       .then((res) => res.json())
       .then((data: Admin[]) => {
         setAdmins(data);
@@ -114,7 +114,7 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
     };
 
     try {
-      const res = await fetch("https://wksolutions.somee.com/api/ventas/confirmar-compra", {
+      const res = await fetch("https://www.perfumesadoss.com/api/ventas/confirmar-compra", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
