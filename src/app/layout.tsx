@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   title: "Perfumes Importados", // Cambia el título por el que desees
   description: "Sitio web de Perfumes Importados", // Opcional, modifica la descripción
   icons: {
-    icon: "/Iconos.ico", // Asegúrate de tener el favicon en la carpeta public
+    icon: "/Iconos2.ico", // Asegúrate de tener el favicon en la carpeta public
   },
 };
 
