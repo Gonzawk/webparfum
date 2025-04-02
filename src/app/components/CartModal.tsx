@@ -33,9 +33,9 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
     setTimeout(() => setShowToast(false), 3000);
   };
 
-  // Cargar administradores desde el endpoint
+  // Cargar administradores desde el endpoint usando la base URL desde el .env
   useEffect(() => {
-    fetch("https://www.perfumesadoss.com/api/Ventas/admins")
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Ventas/admins`)
       .then((res) => res.json())
       .then((data: Admin[]) => {
         setAdmins(data);
@@ -68,13 +68,13 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
   // Función para decodificar el JWT y extraer el ID del usuario
   function parseJwt(token: string): unknown | null {
     try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
       const jsonPayload = decodeURIComponent(
         atob(base64)
-          .split('')
-          .map((_char) => '%' + ('00' + _char.charCodeAt(0).toString(16)).slice(-2))
-          .join('')
+          .split("")
+          .map((_char) => "%" + ("00" + _char.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
       );
       return JSON.parse(jsonPayload);
     } catch {
@@ -114,16 +114,17 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
     };
 
     try {
-      const res = await fetch("https://www.perfumesadoss.com/api/ventas/confirmar-compra", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/ventas/confirmar-compra`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
       if (res.ok) {
         const data = await res.json();
-        // Asigna el mensaje recibido tal cual
         setPurchaseMessage(data.message);
-        // Si el mensaje no menciona stock, se considera que la compra fue exitosa y se limpia el carrito
         if (!data.message.toLowerCase().includes("stock")) {
           clearCart();
         }
@@ -149,13 +150,11 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
         className="bg-white p-6 rounded-lg w-full max-w-2xl mx-4 overflow-y-auto max-h-[90vh] shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Toast de confirmación para eliminación o vaciado */}
         {showToast && toastMessage && (
           <div className="mb-4 p-2 bg-green-100 border border-green-400 rounded text-green-800 text-center">
             {toastMessage}
           </div>
         )}
-        {/* Mensaje de confirmación de compra o error */}
         {purchaseMessage && (
           <div className="mb-4 p-2 bg-blue-100 border border-blue-400 rounded text-blue-800 text-center">
             {purchaseMessage}
@@ -191,7 +190,9 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
                   </div>
                   <div className="flex-grow sm:ml-4 mt-2 sm:mt-0">
                     <h3 className="text-lg font-bold text-black">{item.product.modelo}</h3>
-                    <p className="text-sm text-black">Precio: ${effectivePrice.toFixed(2)}</p>
+                    <p className="text-sm text-black">
+                      Precio: ${effectivePrice.toFixed(2)}
+                    </p>
                     <p className="text-sm text-black">
                       Subtotal: ${(item.quantity * effectivePrice).toFixed(2)}
                     </p>
@@ -224,7 +225,6 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
         <div className="mt-4 text-right font-bold text-black">
           Total: ${calculateTotal().toFixed(2)}
         </div>
-        {/* Sección para seleccionar el administrador */}
         <div className="mt-4">
           <label className="block text-black mb-1">Asignar un Administrador:</label>
           <select
@@ -239,7 +239,6 @@ const CartModal: React.FC<CartModalProps> = ({ onClose }) => {
             ))}
           </select>
         </div>
-        {/* Botones finales */}
         <div className="mt-6 flex flex-col space-y-4 sm:flex-row sm:justify-end sm:space-y-0 sm:space-x-4">
           <button
             onClick={handleConfirmPurchase}

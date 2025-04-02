@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Navbar from '@/app/components/Navbar';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -53,7 +53,7 @@ const MisDatos: React.FC = () => {
       setError("Token inválido.");
       return;
     }
-    fetch(`https://www.perfumesadoss.com/api/usuarios/misdatos/${userId}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/misdatos/${userId}`)
       .then((res) => res.json())
       .then((data) => {
         setUserData(data);
@@ -75,7 +75,7 @@ const MisDatos: React.FC = () => {
       newEmail: email
     };
     try {
-      const res = await fetch(`https://www.perfumesadoss.com/api/usuarios/misdatos/${userData?.usuarioId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/misdatos/${userData?.usuarioId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'

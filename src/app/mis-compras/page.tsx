@@ -59,12 +59,11 @@ const MisCompras: React.FC = () => {
       setError('No se pudo obtener el usuario autenticado.');
       return;
     }
-    // Se asume que el endpoint del backend es:
-    // GET http://localhost:5200/api/compras/miscompras/{userId}
-    fetch(`https://www.perfumesadoss.com/api/compras/miscompras/${userId}`)
+    // Utilizando la base de la URL definida en .env
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/compras/miscompras/${userId}`)
       .then((res) => res.json())
       .then((data) => setPurchases(data))
-      .catch((err) => setError('Error al cargar tus compras: ' + err.message));
+      .catch((err: any) => setError('Error al cargar tus compras: ' + err.message));
   }, [getUserIdFromToken]);
 
   const toggleDetails = (ventaId: number) => {
@@ -85,19 +84,25 @@ const MisCompras: React.FC = () => {
               <div key={purchase.ventaId} className="bg-white rounded-lg shadow p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-center border-b pb-2 mb-4">
                   <div className="text-gray-800">
-                    <p><strong>Compra ID:</strong> {purchase.ventaId}</p>
                     <p>
-                      <strong>Fecha:</strong>{' '}
+                      <strong>Compra ID:</strong> {purchase.ventaId}
+                    </p>
+                    <p>
+                      <strong>Fecha:</strong>{" "}
                       {new Date(purchase.fechaCompra).toLocaleDateString()}
                     </p>
                   </div>
                   <div className="text-gray-800">
-                    <p><strong>Total:</strong> ${purchase.total.toFixed(2)}</p>
-                    <p><strong>Estado:</strong> {purchase.estado}</p>
+                    <p>
+                      <strong>Total:</strong> ${purchase.total.toFixed(2)}
+                    </p>
+                    <p>
+                      <strong>Estado:</strong> {purchase.estado}
+                    </p>
                   </div>
                   <div className="text-gray-800">
                     <p>
-                      <strong>Administrador:</strong>{' '}
+                      <strong>Administrador:</strong>{" "}
                       {purchase.adminName ? purchase.adminName : purchase.adminId}
                     </p>
                   </div>

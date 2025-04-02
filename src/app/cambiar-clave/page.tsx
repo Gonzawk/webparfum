@@ -27,7 +27,7 @@ const CambiarClave: React.FC = () => {
 
     setLoading(true);
     try {
-      const res = await fetch('https://www.perfumesadoss.com/api/Usuarios/restablecer', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Usuarios/restablecer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code, newPassword }),
@@ -44,9 +44,9 @@ const CambiarClave: React.FC = () => {
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError('Error en la conexión: ' + err.message);
+        setError('Error en la solicitud: ' + err.message);
       } else {
-        setError('Error en la conexión.');
+        setError('Error en la solicitud.');
       }
     }
     setLoading(false);

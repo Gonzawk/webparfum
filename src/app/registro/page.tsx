@@ -40,7 +40,7 @@ const Registro: React.FC = () => {
     };
 
     try {
-      const response = await fetch('https://www.perfumesadoss.com/api/Usuarios/register', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Usuarios/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

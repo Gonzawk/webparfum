@@ -30,7 +30,8 @@ const Login: React.FC = () => {
     }
 
     try {
-      const response = await fetch('https://www.perfumesadoss.com/api/Auth/login', {
+      // Se utiliza la variable de entorno NEXT_PUBLIC_API_URL para definir la base del endpoint
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -117,15 +118,6 @@ const Login: React.FC = () => {
             </button>
           </form>
           <div className="mt-4 text-center">
-            <p className="text-sm text-black">
-              ¿No tienes cuenta?{' '}
-              <Link
-                href={`/registro?callbackUrl=${encodeURIComponent(callbackUrl || '/catalogo')}`}
-                className="text-blue-500 hover:underline"
-              >
-                Registrarse
-              </Link>
-            </p>
             <p className="mt-2 text-sm text-black">
               ¿Olvidaste tu contraseña?{' '}
               <Link href="/restablecer-clave" className="text-blue-500 hover:underline">

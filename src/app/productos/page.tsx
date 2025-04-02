@@ -42,12 +42,12 @@ const Productos: React.FC = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch('https://www.perfumesadoss.com/api/Marca')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Marca`)
       .then((res) => res.json())
       .then((data) => setBrands(data))
       .catch((err) => console.error('Error fetching brands', err));
 
-    fetch('https://www.perfumesadoss.com/api/products')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`)
       .then((res) => res.json())
       .then((data) => setProducts(data))
       .catch((err) => console.error('Error fetching products', err));
@@ -56,7 +56,7 @@ const Productos: React.FC = () => {
   const handleAddBrand = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('https://www.perfumesadoss.com/api/Marca', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Marca`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombre: brandName }),
@@ -80,7 +80,7 @@ const Productos: React.FC = () => {
 
   const handleDeleteBrand = async (marcaId: number) => {
     try {
-      const res = await fetch(`https://www.perfumesadoss.com/api/Marca/${marcaId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Marca/${marcaId}`, {
         method: 'DELETE',
       });
       if (res.ok) {
@@ -120,7 +120,7 @@ const Productos: React.FC = () => {
       };
       if (editingProductId === null) {
         // Crear producto
-        const res = await fetch('https://www.perfumesadoss.com/api/products', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
@@ -135,7 +135,7 @@ const Productos: React.FC = () => {
         }
       } else {
         // Actualizar producto
-        const res = await fetch(`https://www.perfumesadoss.com/api/products/${editingProductId}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${editingProductId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...payload, perfumeId: editingProductId }),
@@ -192,7 +192,7 @@ const Productos: React.FC = () => {
 
   const handleDeleteProduct = async (id: number) => {
     try {
-      const res = await fetch(`https://www.perfumesadoss.com/api/products/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}`, {
         method: 'DELETE',
       });
       if (res.ok) {
@@ -458,47 +458,46 @@ const Productos: React.FC = () => {
           </div>
         )}
 
-{activeSection === 'listado' && (
-  <div className="mx-auto" style={{ maxWidth: "1280px" }}>
-    <div className="bg-white rounded-lg p-6 shadow">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Listado de Productos</h2>
-      <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse text-black">
-          <thead>
-            <tr>
-              <th className="border px-4 py-2 text-black">ID</th>
-              <th className="border px-4 py-2 text-black">Modelo</th>
-              <th className="border px-4 py-2 text-black">Marca</th>
-              <th className="border px-4 py-2 text-black">Precio Minorista</th>
-              <th className="border px-4 py-2 text-black">Precio Mayorista</th>
-              <th className="border px-4 py-2 text-black">Género</th>
-              <th className="border px-4 py-2 text-black">Volumen</th>
-              <th className="border px-4 py-2 text-black">Stock</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product) => {
-              const brand = brands.find((b) => b.marcaId === product.marcaId);
-              return (
-                <tr key={product.perfumeId}>
-                  <td className="border px-4 py-2 text-center text-black">{product.perfumeId}</td>
-                  <td className="border px-4 py-2 text-black">{product.modelo}</td>
-                  <td className="border px-4 py-2 text-black">{brand ? brand.nombre : 'Sin marca'}</td>
-                  <td className="border px-4 py-2 text-right text-black">${product.precioMinorista.toFixed(2)}</td>
-                  <td className="border px-4 py-2 text-right text-black">${product.precioMayorista.toFixed(2)}</td>
-                  <td className="border px-4 py-2 text-center text-black">{product.genero}</td>
-                  <td className="border px-4 py-2 text-center text-black">{product.volumen} ml</td>
-                  <td className="border px-4 py-2 text-center text-black">{product.stock}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-)}
-
+        {activeSection === 'listado' && (
+          <div className="mx-auto" style={{ maxWidth: "1280px" }}>
+            <div className="bg-white rounded-lg p-6 shadow">
+              <h2 className="text-2xl font-bold mb-6 text-gray-800">Listado de Productos</h2>
+              <div className="overflow-x-auto">
+                <table className="min-w-full border-collapse text-black">
+                  <thead>
+                    <tr>
+                      <th className="border px-4 py-2 text-black">ID</th>
+                      <th className="border px-4 py-2 text-black">Modelo</th>
+                      <th className="border px-4 py-2 text-black">Marca</th>
+                      <th className="border px-4 py-2 text-black">Precio Minorista</th>
+                      <th className="border px-4 py-2 text-black">Precio Mayorista</th>
+                      <th className="border px-4 py-2 text-black">Género</th>
+                      <th className="border px-4 py-2 text-black">Volumen</th>
+                      <th className="border px-4 py-2 text-black">Stock</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {products.map((product) => {
+                      const brand = brands.find((b) => b.marcaId === product.marcaId);
+                      return (
+                        <tr key={product.perfumeId}>
+                          <td className="border px-4 py-2 text-center text-black">{product.perfumeId}</td>
+                          <td className="border px-4 py-2 text-black">{product.modelo}</td>
+                          <td className="border px-4 py-2 text-black">{brand ? brand.nombre : 'Sin marca'}</td>
+                          <td className="border px-4 py-2 text-right text-black">${product.precioMinorista.toFixed(2)}</td>
+                          <td className="border px-4 py-2 text-right text-black">${product.precioMayorista.toFixed(2)}</td>
+                          <td className="border px-4 py-2 text-center text-black">{product.genero}</td>
+                          <td className="border px-4 py-2 text-center text-black">{product.volumen} ml</td>
+                          <td className="border px-4 py-2 text-center text-black">{product.stock}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
 
         {error && <p className="text-center text-red-500 mt-4">{error}</p>}
       </div>

@@ -2,9 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/app/components/Navbar';
-// Se eliminó el import de Link, ya que no se usa
 import PrivateRoutes from '@/app/components/PrivateRoutes';
-import Image from 'next/image'; // Se agregó para optimizar la imagen
+import Image from 'next/image';
 
 interface Usuario {
   usuarioId: number;
@@ -41,7 +40,7 @@ const Usuarios: React.FC = () => {
 
   // Cargar usuarios al montar el componente
   useEffect(() => {
-    fetch('https://www.perfumesadoss.com/api/usuarios')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios`)
       .then((res) => res.json())
       .then((data) => setUsuarios(data))
       .catch((err) => console.error('Error fetching usuarios', err));
@@ -63,7 +62,7 @@ const Usuarios: React.FC = () => {
   // Función para borrar un usuario
   const handleDeleteUsuario = async (id: number) => {
     try {
-      const res = await fetch(`https://www.perfumesadoss.com/api/usuarios/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/${id}`, {
         method: 'DELETE'
       });
       if (res.ok) {
@@ -92,7 +91,7 @@ const Usuarios: React.FC = () => {
         password: newUsuario.password,
         roleName: newUsuario.rol
       };
-      const res = await fetch('https://www.perfumesadoss.com/api/Usuarios/createByAdmin', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Usuarios/createByAdmin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

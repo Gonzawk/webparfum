@@ -31,7 +31,7 @@ const RestablecerClave: React.FC = () => {
 
     setLoading(true);
     try {
-      const res = await fetch('https://www.perfumesadoss.com/api/Usuarios/solicitarRecuperacion', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Usuarios/solicitarRecuperacion`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
