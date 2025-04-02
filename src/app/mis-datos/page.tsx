@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from '@/app/components/Navbar';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -20,7 +20,7 @@ const MisDatos: React.FC = () => {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  // Función para decodificar el JWT (igual que en el Navbar)
+  // Función para decodificar el JWT
   function parseJwt(token: string): unknown | null {
     try {
       const base64Url = token.split('.')[1];
@@ -37,6 +37,14 @@ const MisDatos: React.FC = () => {
     }
   }
 
+  // Obtener el ID del usuario desde el token (definido como función normal)
+  const getUserIdFromToken = (): number | null => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!token) return null;
+    const payload = parseJwt(token) as { nameid?: string; sub?: string } | null;
+    return payload?.nameid ? Number(payload.nameid) : payload?.sub ? Number(payload.sub) : null;
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (!token) {
@@ -44,7 +52,6 @@ const MisDatos: React.FC = () => {
       return;
     }
     const payload = parseJwt(token);
-    // Usamos "nameid" (o "sub", según tu configuración) para obtener el identificador
     const userId = payload
       ? ((payload as { nameid?: string; sub?: string }).nameid ||
          (payload as { nameid?: string; sub?: string }).sub)
@@ -60,7 +67,7 @@ const MisDatos: React.FC = () => {
         setNombreCompleto(data.nombreCompleto);
         setEmail(data.email);
       })
-      .catch((err) => setError("Error al cargar los datos: " + err.message));
+      .catch((err: any) => setError("Error al cargar los datos: " + err.message));
   }, [router]);
 
   const handleSave = async () => {

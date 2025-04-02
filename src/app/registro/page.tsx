@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/app/components/Navbar';
 import Head from 'next/head';
+import Image from 'next/image';
 
 const Registro: React.FC = () => {
   const [nombreCompleto, setNombreCompleto] = useState('');
@@ -173,10 +174,12 @@ const Registro: React.FC = () => {
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm mx-auto text-center">
-            <img
+            <Image
               src="https://i.ibb.co/bgVxMWhC/confirmation-1152155-960-720.webp"
               alt="Confirmación"
-              className="w-24 h-24 mx-auto mb-4"
+              width={96}
+              height={96}
+              className="mx-auto mb-4"
             />
             <h2 className="text-2xl font-bold text-black mb-4">
               Usuario Registrado.
