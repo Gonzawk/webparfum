@@ -37,14 +37,6 @@ const MisDatos: React.FC = () => {
     }
   }
 
-  // Obtener el ID del usuario desde el token (definido como función normal)
-  const getUserIdFromToken = (): number | null => {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    if (!token) return null;
-    const payload = parseJwt(token) as { nameid?: string; sub?: string } | null;
-    return payload?.nameid ? Number(payload.nameid) : payload?.sub ? Number(payload.sub) : null;
-  };
-
   useEffect(() => {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (!token) {
@@ -52,6 +44,7 @@ const MisDatos: React.FC = () => {
       return;
     }
     const payload = parseJwt(token);
+    // Usamos "nameid" (o "sub", según tu configuración) para obtener el identificador
     const userId = payload
       ? ((payload as { nameid?: string; sub?: string }).nameid ||
          (payload as { nameid?: string; sub?: string }).sub)
@@ -67,7 +60,13 @@ const MisDatos: React.FC = () => {
         setNombreCompleto(data.nombreCompleto);
         setEmail(data.email);
       })
-      .catch((err: any) => setError("Error al cargar los datos: " + err.message));
+      .catch((err: unknown) => {
+        if (err instanceof Error) {
+          setError("Error al cargar los datos: " + err.message);
+        } else {
+          setError("Error al cargar los datos.");
+        }
+      });
   }, [router]);
 
   const handleSave = async () => {

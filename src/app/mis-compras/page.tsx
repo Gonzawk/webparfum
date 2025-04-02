@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from '@/app/components/Navbar';
 
 interface SaleDetail {
@@ -46,12 +46,12 @@ const MisCompras: React.FC = () => {
   }
 
   // Obtener el ID del usuario desde el token
-  const getUserIdFromToken = useCallback((): number | null => {
+  const getUserIdFromToken = (): number | null => {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (!token) return null;
     const payload = parseJwt(token) as { nameid?: string; sub?: string } | null;
     return payload?.nameid ? Number(payload.nameid) : payload?.sub ? Number(payload.sub) : null;
-  }, []);
+  };
 
   useEffect(() => {
     const userId = getUserIdFromToken();
@@ -63,8 +63,14 @@ const MisCompras: React.FC = () => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/compras/miscompras/${userId}`)
       .then((res) => res.json())
       .then((data) => setPurchases(data))
-      .catch((err: any) => setError('Error al cargar tus compras: ' + err.message));
-  }, [getUserIdFromToken]);
+      .catch((err: unknown) => {
+        if (err instanceof Error) {
+          setError('Error al cargar tus compras: ' + err.message);
+        } else {
+          setError('Error al cargar tus compras.');
+        }
+      });
+  }, []);
 
   const toggleDetails = (ventaId: number) => {
     setExpandedSaleId(expandedSaleId === ventaId ? null : ventaId);
@@ -88,7 +94,7 @@ const MisCompras: React.FC = () => {
                       <strong>Compra ID:</strong> {purchase.ventaId}
                     </p>
                     <p>
-                      <strong>Fecha:</strong>{" "}
+                      <strong>Fecha:</strong>{' '}
                       {new Date(purchase.fechaCompra).toLocaleDateString()}
                     </p>
                   </div>
@@ -102,7 +108,7 @@ const MisCompras: React.FC = () => {
                   </div>
                   <div className="text-gray-800">
                     <p>
-                      <strong>Administrador:</strong>{" "}
+                      <strong>Administrador:</strong>{' '}
                       {purchase.adminName ? purchase.adminName : purchase.adminId}
                     </p>
                   </div>

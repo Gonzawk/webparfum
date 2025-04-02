@@ -2,7 +2,7 @@
 
 import React, { useState, useContext, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { AuthContext } from '@/app/context/AuthContext';
 
 const Login: React.FC = () => {
@@ -11,9 +11,6 @@ const Login: React.FC = () => {
   const [keepSession, setKeepSession] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  const searchParams = useSearchParams();
-  // callbackUrl ya no se utiliza, se elimina su uso para evitar error de ESLint
-  // const callbackUrl = searchParams.get('callbackUrl');
   const { login } = useContext(AuthContext);
 
   const isValidEmail = (email: string): boolean => {
