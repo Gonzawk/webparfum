@@ -96,25 +96,6 @@ const Ventas: React.FC = () => {
     setVisibleSalesCount(sales.length);
   };
 
-  // Para ventas asignadas
-  const assignedSales = currentUserId !== null ? sales.filter(sale => sale.adminId === currentUserId) : [];
-  const baseSales = activeTab === 'ventas' ? sales : assignedSales;
-
-  // Aplicar filtros
-  const filteredSales = baseSales.filter(sale => {
-    const nameField = userRole === 'Superadmin'
-      ? sale.adminName || sale.adminId.toString()
-      : sale.clienteName || sale.usuarioId.toString();
-    if (filterName && !nameField.toLowerCase().includes(filterName.toLowerCase())) return false;
-    if (filterEstado && sale.estado.toLowerCase() !== filterEstado.toLowerCase()) return false;
-    const saleDate = new Date(sale.fechaCompra);
-    if (filterStartDate && saleDate < new Date(filterStartDate)) return false;
-    if (filterEndDate && saleDate > new Date(filterEndDate)) return false;
-    return true;
-  });
-
-  const salesToDisplay = filteredSales.slice(0, visibleSalesCount);
-
   // Función para confirmar/finalizar ventas
   const confirmSale = async (ventaId: number, currentEstado: string) => {
     if (!currentUserId) return;
@@ -158,7 +139,7 @@ const Ventas: React.FC = () => {
     }
   };
 
-  // Función para cancelar ventas y devolver stock
+  // Función para cancelar venta (cambia estado a 'Cancelado')
   const cancelSale = async (ventaId: number) => {
     if (!currentUserId) return;
     const endpoint = `${process.env.NEXT_PUBLIC_API_URL}/api/ventas/${ventaId}/cancelar?adminId=${currentUserId}`;
@@ -190,6 +171,53 @@ const Ventas: React.FC = () => {
       setTimeout(() => setPurchaseMessage(''), 5000);
     }
   };
+
+  // Función para eliminar venta (para ventas canceladas)
+  const eliminarVenta = async (ventaId: number) => {
+    if (!currentUserId) return;
+    const endpoint = `${process.env.NEXT_PUBLIC_API_URL}/api/ventas/${ventaId}/eliminar`;
+    try {
+      const res = await fetch(endpoint, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSales(prev => prev.filter(sale => sale.ventaId !== ventaId));
+        setPurchaseMessage(data.Message || 'Venta eliminada exitosamente.');
+        setTimeout(() => setPurchaseMessage(''), 5000);
+      } else {
+        const msg = await res.text();
+        setPurchaseMessage(`Error eliminando venta: ${msg}`);
+        setTimeout(() => setPurchaseMessage(''), 5000);
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setPurchaseMessage(`Error en la solicitud: ${err.message}`);
+      } else {
+        setPurchaseMessage("Error en la solicitud.");
+      }
+      setTimeout(() => setPurchaseMessage(''), 5000);
+    }
+  };
+
+  // Filtrado de ventas
+  const assignedSales = currentUserId !== null ? sales.filter(sale => sale.adminId === currentUserId) : [];
+  const baseSales = activeTab === 'ventas' ? sales : assignedSales;
+
+  const filteredSales = baseSales.filter(sale => {
+    const nameField = userRole === 'Superadmin'
+      ? sale.adminName || sale.adminId.toString()
+      : sale.clienteName || sale.usuarioId.toString();
+    if (filterName && !nameField.toLowerCase().includes(filterName.toLowerCase())) return false;
+    if (filterEstado && sale.estado.toLowerCase() !== filterEstado.toLowerCase()) return false;
+    const saleDate = new Date(sale.fechaCompra);
+    if (filterStartDate && saleDate < new Date(filterStartDate)) return false;
+    if (filterEndDate && saleDate > new Date(filterEndDate)) return false;
+    return true;
+  });
+
+  const salesToDisplay = filteredSales.slice(0, visibleSalesCount);
 
   return (
     <PrivateRoutes>
@@ -311,32 +339,47 @@ const Ventas: React.FC = () => {
                       >
                         {expandedSaleId === sale.ventaId ? 'Cerrar' : 'Ver Detalles'}
                       </button>
-                      {activeTab === 'asignadas' &&
-                        (sale.estado.toLowerCase() === 'pendiente' ||
-                          sale.estado.toLowerCase() === 'confirmado') && (
-                          <>
-                            <button
-                              onClick={() => {
-                                confirmSale(sale.ventaId, sale.estado);
-                                setActionMenuSaleId(null);
-                              }}
-                              className="bg-green-500 text-white px-3 py-1 rounded"
-                            >
-                              {sale.estado.toLowerCase() === 'confirmado'
-                                ? 'Cerrar Venta'
-                                : 'Confirmar'}
-                            </button>
-                            <button
-                              onClick={() => {
-                                cancelSale(sale.ventaId);
-                                setActionMenuSaleId(null);
-                              }}
-                              className="bg-red-500 text-white px-3 py-1 rounded"
-                            >
-                              Cancelar
-                            </button>
-                          </>
-                        )}
+                      {sale.estado.toLowerCase() !== 'cancelado' && (
+                        <>
+                          {(sale.estado.toLowerCase() === 'pendiente' ||
+                            sale.estado.toLowerCase() === 'confirmado') && (
+                            <>
+                              <button
+                                onClick={() => {
+                                  confirmSale(sale.ventaId, sale.estado);
+                                  setActionMenuSaleId(null);
+                                }}
+                                className="bg-green-500 text-white px-3 py-1 rounded"
+                              >
+                                {sale.estado.toLowerCase() === 'confirmado'
+                                  ? 'Cerrar Venta'
+                                  : 'Confirmar'}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  cancelSale(sale.ventaId);
+                                  setActionMenuSaleId(null);
+                                }}
+                                className="bg-red-500 text-white px-3 py-1 rounded"
+                              >
+                                Cancelar
+                              </button>
+                            </>
+                          )}
+                        </>
+                      )}
+                      {/* Mostrar el botón "Eliminar Venta" si el estado es 'cancelado' y el usuario es Superadmin o si está en la pestaña asignadas */}
+                      {(sale.estado.toLowerCase() === 'cancelado' && (activeTab === 'asignadas' || userRole === 'Superadmin')) && (
+                        <button
+                          onClick={() => {
+                            eliminarVenta(sale.ventaId);
+                            setActionMenuSaleId(null);
+                          }}
+                          className="bg-red-700 text-white px-3 py-1 rounded"
+                        >
+                          Eliminar Venta
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -353,26 +396,37 @@ const Ventas: React.FC = () => {
                       >
                         {expandedSaleId === sale.ventaId ? 'Ocultar' : 'Ver'}
                       </button>
-                      {activeTab === 'asignadas' &&
-                        (sale.estado.toLowerCase() === 'pendiente' ||
-                          sale.estado.toLowerCase() === 'confirmado') && (
-                          <>
-                            <button
-                              onClick={() => confirmSale(sale.ventaId, sale.estado)}
-                              className="bg-green-500 text-white px-2 py-1 rounded text-xs"
-                            >
-                              {sale.estado.toLowerCase() === 'confirmado'
-                                ? 'Cerrar'
-                                : 'Confirmar'}
-                            </button>
-                            <button
-                              onClick={() => cancelSale(sale.ventaId)}
-                              className="bg-red-500 text-white px-2 py-1 rounded text-xs"
-                            >
-                              Cancelar
-                            </button>
-                          </>
-                        )}
+                      {sale.estado.toLowerCase() !== 'cancelado' && (
+                        <>
+                          {(sale.estado.toLowerCase() === 'pendiente' ||
+                            sale.estado.toLowerCase() === 'confirmado') && (
+                            <>
+                              <button
+                                onClick={() => confirmSale(sale.ventaId, sale.estado)}
+                                className="bg-green-500 text-white px-2 py-1 rounded text-xs"
+                              >
+                                {sale.estado.toLowerCase() === 'confirmado'
+                                  ? 'Cerrar'
+                                  : 'Confirmar'}
+                              </button>
+                              <button
+                                onClick={() => cancelSale(sale.ventaId)}
+                                className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+                              >
+                                Cancelar
+                              </button>
+                            </>
+                          )}
+                        </>
+                      )}
+                      {(sale.estado.toLowerCase() === 'cancelado' && (activeTab === 'asignadas' || userRole === 'Superadmin')) && (
+                        <button
+                          onClick={() => eliminarVenta(sale.ventaId)}
+                          className="bg-red-700 text-white px-2 py-1 rounded text-xs"
+                        >
+                          Eliminar Venta
+                        </button>
+                      )}
                     </div>
                   </div>
                   <div className="mt-1 text-sm">
