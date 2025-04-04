@@ -6,7 +6,7 @@ export default function SocialMedia() {
   return (
     <div className="flex justify-center gap-8 mt-5 ">
       <Link
-        href="https://www.instagram.com/"
+        href="https://www.instagram.com/perfumes.importados.777/"
         target="_blank"
         className="flex flex-col items-center"
       >
@@ -20,7 +20,7 @@ export default function SocialMedia() {
         <span className="mt-2 text-sm font-medium">Instagram</span>
       </Link>
       <Link
-        href="https://wa.me/+5493515552099?text=Hola%20buenas%20noches.%20Me%20gustaria%20saber%20como%20realizo%20mi%20pedido.%20Muchas%20Gracias."
+        href="https://wa.me/+5493832460459?text=Hola%20buenas%20noches.%20Me%20gustaria%20saber%20como%20realizo%20mi%20pedido.%20Muchas%20Gracias."
         target="_blank"
         className="flex flex-col items-center"
       >

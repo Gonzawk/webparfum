@@ -115,20 +115,23 @@ const Inicio: React.FC = () => {
               </div>
               <div className="bg-white p-8 rounded-2xl shadow-xl text-center w-full max-w-3xl border border-gray-200 mx-auto">
                 <h2 className="text-3xl font-semibold mb-4 text-gray-800">Información de Contacto</h2>
-                <p className="text-lg text-gray-800 mb-2"><strong>📞 Teléfono:</strong> +54 9 3515 55-2099</p>
+                <p className="text-lg text-gray-800 mb-2"><strong>📞 Teléfono:</strong> +54 9 3832 413394</p>
                 <p className="text-lg text-gray-800 mb-2 break-words">
                   <strong>📧 Email:</strong> <a href="mailto:perfumes.importados.777@perfumesadoss.com" className="text-blue-600 hover:underline break-words">perfumes.importados.777@perfumesadoss.com</a>
                 </p>
                 <p className="text-lg text-gray-800 mb-4"><strong>📍 Dirección:</strong> Corrientes 463, Centro - Córdoba, Argentina.</p>
                 <h2 className="text-3xl font-semibold mt-6 mb-4 text-gray-800">Ubicación</h2>
                 <div className="w-full h-64 rounded-lg overflow-hidden shadow-lg border border-gray-300">
-                  <iframe
-                    className="w-full h-full"
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3404.7488294043883!2d-64.18193942363165!3d-31.421045574259466!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9432a29a6ece524f%3A0xd212fe80d8d57b17!2sCorrientes%20463%2C%20X5000%20C%C3%B3rdoba!5e0!3m2!1ses!2sar!4v1742517792998!5m2!1ses!2sar"
-                    allowFullScreen
-                    loading="lazy"
-                  ></iframe>
-                </div>
+  <iframe
+    className="w-full h-full"
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d869.9949095058355!2d-65.06336683035578!3d-29.282926628725345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x942f823a513b68c5%3A0xfa310124fa0416b!2sRam%C3%B3n%20San%20Castillo%20280%2C%20K5260%20Recreo%2C%20Catamarca!5e0!3m2!1ses!2sar!4v1743783126632!5m2!1ses!2sar"
+    style={{ border: 0 }}
+    allowFullScreen
+    loading="lazy"
+    referrerPolicy="no-referrer-when-downgrade"
+  ></iframe>
+</div>
+
               </div>
             </div>
           </div>
