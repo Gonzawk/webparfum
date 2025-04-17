@@ -1,6 +1,4 @@
 // src/app/decants/[id]/page.tsx
-
-import React from 'react';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
@@ -14,18 +12,12 @@ interface Decant {
   fechaCreacion: string;
 }
 
-export default async function DecantPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function Page({ params }: { params: { id: string } }) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/Decants/${params.id}`,
     { cache: 'no-store' }
   );
-  if (!res.ok) {
-    notFound();
-  }
+  if (!res.ok) notFound();
   const decant: Decant = await res.json();
 
   return (
@@ -50,8 +42,7 @@ export default async function DecantPage({
           <strong>Estado:</strong> {decant.estado === 1 ? 'Activo' : 'Inactivo'}
         </p>
         <p className="text-gray-700 dark:text-gray-300">
-          <strong>Creado el:</strong>{' '}
-          {new Date(decant.fechaCreacion).toLocaleString()}
+          <strong>Creado el:</strong> {new Date(decant.fechaCreacion).toLocaleString()}
         </p>
       </div>
     </main>

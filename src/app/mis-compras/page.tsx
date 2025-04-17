@@ -1,6 +1,7 @@
+// src/app/mis-compras/page.tsx
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Navbar from '@/app/components/Navbar';
 
 interface SaleDetail {
@@ -9,8 +10,8 @@ interface SaleDetail {
   cantidad: number;
   precioUnitario: number;
   subtotal: number;
-  modelo: string; // Se espera que el DTO incluya esta propiedad
-  marca: string;  // Se espera que el DTO incluya esta propiedad
+  modelo: string;
+  marca: string;
 }
 
 interface Purchase {
@@ -45,14 +46,15 @@ const MisCompras: React.FC = () => {
     }
   }
 
-  // Obtener el ID del usuario desde el token
-  const getUserIdFromToken = (): number | null => {
+  // Obtener el ID del usuario desde el token, memoizado
+  const getUserIdFromToken = useCallback((): number | null => {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (!token) return null;
     const payload = parseJwt(token) as { nameid?: string; sub?: string } | null;
     return payload?.nameid ? Number(payload.nameid) : payload?.sub ? Number(payload.sub) : null;
-  };
+  }, []);
 
+  // Cargar compras al montar
   useEffect(() => {
     const userId = getUserIdFromToken();
     if (!userId) {
@@ -70,7 +72,6 @@ const MisCompras: React.FC = () => {
         }
       });
   }, [getUserIdFromToken]);
-  
 
   const toggleDetails = (ventaId: number) => {
     setExpandedSaleId(expandedSaleId === ventaId ? null : ventaId);
@@ -90,27 +91,15 @@ const MisCompras: React.FC = () => {
               <div key={purchase.ventaId} className="bg-white rounded-lg shadow p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-center border-b pb-2 mb-4">
                   <div className="text-gray-800">
-                    <p>
-                      <strong>Compra ID:</strong> {purchase.ventaId}
-                    </p>
-                    <p>
-                      <strong>Fecha:</strong>{' '}
-                      {new Date(purchase.fechaCompra).toLocaleDateString()}
-                    </p>
+                    <p><strong>Compra ID:</strong> {purchase.ventaId}</p>
+                    <p><strong>Fecha:</strong> {new Date(purchase.fechaCompra).toLocaleDateString()}</p>
                   </div>
                   <div className="text-gray-800">
-                    <p>
-                      <strong>Total:</strong> ${purchase.total.toFixed(2)}
-                    </p>
-                    <p>
-                      <strong>Estado:</strong> {purchase.estado}
-                    </p>
+                    <p><strong>Total:</strong> ${purchase.total.toFixed(2)}</p>
+                    <p><strong>Estado:</strong> {purchase.estado}</p>
                   </div>
                   <div className="text-gray-800">
-                    <p>
-                      <strong>Administrador:</strong>{' '}
-                      {purchase.adminName ? purchase.adminName : purchase.adminId}
-                    </p>
+                    <p><strong>Administrador:</strong> {purchase.adminName ?? purchase.adminId}</p>
                   </div>
                   <div className="mt-2 sm:mt-0">
                     <button
@@ -123,10 +112,8 @@ const MisCompras: React.FC = () => {
                 </div>
                 {expandedSaleId === purchase.ventaId && (
                   <div className="mt-4">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                      Detalles de la Compra:
-                    </h3>
-                    {purchase.detalles && purchase.detalles.length > 0 ? (
+                    <h3 className="text-xl font-semibold text-gray-800 mb-2">Detalles de la Compra:</h3>
+                    {purchase.detalles.length > 0 ? (
                       <div className="space-y-4">
                         {purchase.detalles.map((detail) => (
                           <div
@@ -134,20 +121,12 @@ const MisCompras: React.FC = () => {
                             className="flex flex-col sm:flex-row items-center border border-gray-300 rounded p-4"
                           >
                             <div className="flex-1 text-gray-800">
-                              <p>
-                                <strong>Producto:</strong> {detail.modelo} - {detail.marca}
-                              </p>
-                              <p>
-                                <strong>Cantidad:</strong> {detail.cantidad}
-                              </p>
+                              <p><strong>Producto:</strong> {detail.modelo} - {detail.marca}</p>
+                              <p><strong>Cantidad:</strong> {detail.cantidad}</p>
                             </div>
                             <div className="text-gray-800">
-                              <p>
-                                <strong>Precio Unitario:</strong> ${detail.precioUnitario.toFixed(2)}
-                              </p>
-                              <p>
-                                <strong>Subtotal:</strong> ${detail.subtotal.toFixed(2)}
-                              </p>
+                              <p><strong>Precio Unitario:</strong> ${detail.precioUnitario.toFixed(2)}</p>
+                              <p><strong>Subtotal:</strong> ${detail.subtotal.toFixed(2)}</p>
                             </div>
                           </div>
                         ))}
