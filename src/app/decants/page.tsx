@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Navbar from '@/app/components/Navbar';
 import PrivateRoutes from '@/app/components/PrivateRoutes';
 import Link from 'next/link';
@@ -41,23 +41,31 @@ export default function DecantsAdmin() {
   const [origin, setOrigin] = useState('');
   const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/Decants`;
 
+  // Capturar origen para generar URLs
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setOrigin(window.location.origin);
     }
   }, []);
 
-  async function loadDecants() {
-    const res = await fetch(apiUrl);
-    const data: Decant[] = await res.json();
-    setDecants(data);
-    setFilteredDecants(data);
-  }
+  // Función de recarga de datos, memoizada
+  const loadDecants = useCallback(async () => {
+    try {
+      const res = await fetch(apiUrl);
+      const data: Decant[] = await res.json();
+      setDecants(data);
+      setFilteredDecants(data);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [apiUrl]);
 
+  // Carga inicial
   useEffect(() => {
-    loadDecants().catch(console.error);
-  }, []);
+    loadDecants();
+  }, [loadDecants]);
 
+  // Filtrado por ID
   useEffect(() => {
     if (!searchId) {
       setFilteredDecants(decants);
@@ -99,7 +107,9 @@ export default function DecantsAdmin() {
     }));
   };
 
+  // POST luego PUT para asignar codigoQR basado en ID
   async function createDecant() {
+    // 1) POST inicial
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -113,6 +123,7 @@ export default function DecantsAdmin() {
     if (!res.ok) throw new Error('Error al crear decant');
     const newId: string = await res.json();
 
+    // 2) Generar URL y PUT para actualizar codigoQR
     const qrUrl = `${origin}/decants/${newId}`;
     await fetch(`${apiUrl}/${newId}`, {
       method: 'PUT',
@@ -127,10 +138,12 @@ export default function DecantsAdmin() {
       })
     });
 
+    // 3) Refrescar y cerrar modal
     await loadDecants();
     closeModal();
   }
 
+  // PUT edición incluyendo codigoQR
   async function updateDecant() {
     await fetch(`${apiUrl}/${form.id}`, {
       method: 'PUT',
@@ -141,9 +154,18 @@ export default function DecantsAdmin() {
     closeModal();
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Manejar envío del formulario
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    isEditing ? updateDecant().catch(alert) : createDecant().catch(alert);
+    try {
+      if (isEditing) {
+        await updateDecant();
+      } else {
+        await createDecant();
+      }
+    } catch (err: any) {
+      alert(err.message);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -160,6 +182,7 @@ export default function DecantsAdmin() {
           Decants
         </h1>
 
+        {/* Barra de búsqueda y agregar */}
         <div className="flex flex-col md:flex-row items-center md:justify-between mb-6 space-y-4 md:space-y-0">
           <input
             type="text"
@@ -176,6 +199,7 @@ export default function DecantsAdmin() {
           </button>
         </div>
 
+        {/* Tabla de listado */}
         <div className="overflow-x-auto">
           <table className="min-w-full border-collapse">
             <thead>
@@ -235,6 +259,7 @@ export default function DecantsAdmin() {
           </table>
         </div>
 
+        {/* Modal Crear/Editar */}
         {modalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg w-full max-w-md">
