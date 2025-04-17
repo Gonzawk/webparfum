@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/app/components/Navbar';
+import { useRouter } from 'next/navigation';
 import PrivateRoutes from '@/app/components/PrivateRoutes';
 import { Perfume } from '@/app/types/Product';
 
@@ -23,6 +24,7 @@ interface ModelDetails {
 
 const Productos: React.FC = () => {
   // Ahora se permiten 3 secciones: 'marca', 'modelo' y 'listado'
+  const router = useRouter();
   const [activeSection, setActiveSection] = useState<'marca' | 'modelo' | 'listado'>('marca');
   const [brands, setBrands] = useState<Brand[]>([]);
   const [brandName, setBrandName] = useState('');
@@ -247,6 +249,14 @@ const Productos: React.FC = () => {
             }`}
           >
             Listado
+          </button>
+
+          {/* Nuevo botón para administrar Decants */}
+          <button
+            onClick={() => router.push('/decants')}
+            className="px-4 py-2 rounded-md font-medium transition-colors bg-gray-800 text-white border border-transparent hover:border-white"
+          >
+            Decants
           </button>
         </div>
 
