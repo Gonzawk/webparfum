@@ -59,7 +59,6 @@ const MisCompras: React.FC = () => {
       setError('No se pudo obtener el usuario autenticado.');
       return;
     }
-    // Utilizando la base de la URL definida en .env
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/compras/miscompras/${userId}`)
       .then((res) => res.json())
       .then((data) => setPurchases(data))
@@ -70,7 +69,8 @@ const MisCompras: React.FC = () => {
           setError('Error al cargar tus compras.');
         }
       });
-  }, []);
+  }, [getUserIdFromToken]);
+  
 
   const toggleDetails = (ventaId: number) => {
     setExpandedSaleId(expandedSaleId === ventaId ? null : ventaId);

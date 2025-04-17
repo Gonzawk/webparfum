@@ -1,5 +1,8 @@
-// app/decants/[id]/page.tsx
+// src/app/decants/[id]/page.tsx
+
+import React from 'react';
 import Image from 'next/image';
+import { notFound } from 'next/navigation';
 
 interface Decant {
   id: string;
@@ -12,7 +15,7 @@ interface Decant {
 }
 
 export default async function DecantPage({
-  params
+  params,
 }: {
   params: { id: string };
 }) {
@@ -21,13 +24,7 @@ export default async function DecantPage({
     { cache: 'no-store' }
   );
   if (!res.ok) {
-    return (
-      <div className="pt-32 p-4 bg-gray-100 dark:bg-gray-900 min-h-screen">
-        <p className="text-center text-gray-700 dark:text-gray-300">
-          Decant no encontrado.
-        </p>
-      </div>
-    );
+    notFound();
   }
   const decant: Decant = await res.json();
 
@@ -37,7 +34,6 @@ export default async function DecantPage({
         <h1 className="text-3xl font-bold mb-4 text-gray-900 dark:text-gray-100">
           {decant.nombre}
         </h1>
-
         {decant.urlImagen && (
           <Image
             src={decant.urlImagen}
@@ -47,13 +43,11 @@ export default async function DecantPage({
             className="rounded mb-4 object-cover"
           />
         )}
-
         <p className="mb-2 text-gray-700 dark:text-gray-300">
           <strong>Cantidad disponible:</strong> {decant.cantidadDisponible}
         </p>
         <p className="mb-2 text-gray-700 dark:text-gray-300">
-          <strong>Estado:</strong>{' '}
-          {decant.estado === 1 ? 'Activo' : 'Inactivo'}
+          <strong>Estado:</strong> {decant.estado === 1 ? 'Activo' : 'Inactivo'}
         </p>
         <p className="text-gray-700 dark:text-gray-300">
           <strong>Creado el:</strong>{' '}
