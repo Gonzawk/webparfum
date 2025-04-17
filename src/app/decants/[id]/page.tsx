@@ -12,18 +12,21 @@ interface Decant {
   fechaCreacion: string;
 }
 
-export default async function DecantPage(
-  { params }: { 
-    params: { id: string }; 
-    // Debes incluir searchParams en el tipo, aunque no lo destructures
-    searchParams: Record<string, string | string[]>; 
-  }
-) {
+export default async function DecantPage({
+  params,
+}: {
+  // ← aquí indicamos que params es una promesa
+  params: Promise<{ id: string }>;
+}) {
+  // Desempaquetamos tras await
+  const { id } = await params;
+
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/Decants/${params.id}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/Decants/${id}`,
     { cache: 'no-store' }
   );
   if (!res.ok) notFound();
+
   const decant: Decant = await res.json();
 
   return (
