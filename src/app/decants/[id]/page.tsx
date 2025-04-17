@@ -12,14 +12,13 @@ interface Decant {
   fechaCreacion: string;
 }
 
-// Nota: renombramos `searchParams` a `_searchParams` para evitar el error de variable no usada
-export default async function DecantPage({
-  params,
-  searchParams: _searchParams,
-}: {
-  params: { id: string };
-  searchParams: Record<string, string | string[]>;
-}) {
+export default async function DecantPage(
+  { params }: { 
+    params: { id: string }; 
+    // Debes incluir searchParams en el tipo, aunque no lo destructures
+    searchParams: Record<string, string | string[]>; 
+  }
+) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/Decants/${params.id}`,
     { cache: 'no-store' }
