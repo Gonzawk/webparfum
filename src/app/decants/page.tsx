@@ -33,17 +33,22 @@ export default function DecantsAdmin() {
 
   // capturar origin
   useEffect(() => {
-    if (typeof window !== 'undefined') setOrigin(window.location.origin);
+    if (typeof window !== 'undefined') {
+      setOrigin(window.location.origin);
+    }
   }, []);
 
   const load = useCallback(async () => {
     const res = await fetch(api);
-    const data = await res.json();
+    const data: Decant[] = await res.json();
     setDecants(data);
     setFiltered(data);
   }, [api]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
+
   useEffect(() => {
     setFiltered(searchId
       ? decants.filter(d => d.id.toString().includes(searchId))
@@ -58,15 +63,24 @@ export default function DecantsAdmin() {
   };
   const openEdit = (d: Decant) => {
     setIsEditing(true);
-    setForm({ ...d, urlImagen: d.urlImagen ?? '' });
+    setForm({ 
+      id: d.id, 
+      nombre: d.nombre, 
+      cantidadDisponible: d.cantidadDisponible, 
+      urlImagen: d.urlImagen ?? '', 
+      estado: d.estado 
+    });
     setModalOpen(true);
   };
   const close = () => setModalOpen(false);
-  const onChange = (e: React.ChangeEvent<any>) => {
+
+  const onChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setForm(f => ({
       ...f,
-      [name]: ['cantidadDisponible','estado'].includes(name)
+      [name]: ['cantidadDisponible', 'estado'].includes(name)
         ? Number(value)
         : value
     }));
@@ -80,7 +94,7 @@ export default function DecantsAdmin() {
       body: JSON.stringify({
         nombre: form.nombre,
         cantidadDisponible: form.cantidadDisponible,
-        urlImagen: form.urlImagen||null,
+        urlImagen: form.urlImagen || null,
         estado: form.estado
       })
     });
@@ -93,8 +107,15 @@ export default function DecantsAdmin() {
   const updateDecant = async () => {
     await fetch(`${api}/${form.id}`, {
       method: 'PUT',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ ...form, codigoQR: `${origin}/decants/${form.id}` })
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        id: form.id,
+        nombre: form.nombre,
+        cantidadDisponible: form.cantidadDisponible,
+        urlImagen: form.urlImagen || null,
+        estado: form.estado,
+        codigoQR: `${origin}/decants/${form.id}`
+      })
     });
     await load();
     close();
@@ -102,13 +123,17 @@ export default function DecantsAdmin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try { isEditing ? await updateDecant() : await createDecant(); }
-    catch (err) { alert((err as Error).message); }
+    try {
+      if (isEditing) await updateDecant();
+      else            await createDecant();
+    } catch (err) {
+      alert((err as Error).message);
+    }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('Eliminar?')) return;
-    await fetch(`${api}/${id}`,{method:'DELETE'});
+    await fetch(`${api}/${id}`, { method: 'DELETE' });
     await load();
   };
 
@@ -116,12 +141,14 @@ export default function DecantsAdmin() {
     <PrivateRoutes>
       <Navbar />
       <div className="pt-32 p-4 bg-gray-100 dark:bg-gray-900 min-h-screen">
-        <h1 className="text-4xl font-bold text-center mb-8 dark:text-gray-100">Decants</h1>
+        <h1 className="text-4xl font-bold text-center mb-8 dark:text-gray-100">
+          Decants
+        </h1>
 
         <div className="flex mb-6 space-x-4">
           <input
             value={searchId}
-            onChange={e=>setSearchId(e.target.value)}
+            onChange={e => setSearchId(e.target.value)}
             placeholder="Buscar por ID"
             className="border px-3 py-2 rounded flex-1 dark:bg-gray-800 dark:border-gray-700"
           />
@@ -155,10 +182,10 @@ export default function DecantsAdmin() {
                       <QRCodeCanvas value={qrUrl} size={64} />
                     </td>
                     <td className="border px-4 py-2">
-                      <button onClick={()=>openEdit(d)} className="bg-yellow-500 px-3 py-1 rounded text-white mr-2">
+                      <button onClick={() => openEdit(d)} className="bg-yellow-500 px-3 py-1 rounded text-white mr-2">
                         Editar
                       </button>
-                      <button onClick={()=>handleDelete(d.id)} className="bg-red-500 px-3 py-1 rounded text-white mr-2">
+                      <button onClick={() => handleDelete(d.id)} className="bg-red-500 px-3 py-1 rounded text-white mr-2">
                         Eliminar
                       </button>
                       <Link href={`/decants/${d.id}`} className="bg-gray-600 px-3 py-1 rounded text-white">
@@ -166,8 +193,15 @@ export default function DecantsAdmin() {
                       </Link>
                     </td>
                   </tr>
-                )
+                );
               })}
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-4 text-gray-500 dark:text-gray-400">
+                    No se encontraron decants.
+                  </td>
+                </tr>
+              ) : null}
             </tbody>
           </table>
         </div>
