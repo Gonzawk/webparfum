@@ -1,24 +1,30 @@
 // src/app/decants/[id]/page.tsx
-import Image from 'next/image';
-import { notFound } from 'next/navigation';
+import Image from 'next/image'
+import { notFound } from 'next/navigation'
 
 interface Decant {
-  id: string;
-  nombre: string;
-  codigoQR: string;
-  cantidadDisponible: number;
-  urlImagen: string | null;
-  estado: number;
-  fechaCreacion: string;
+  id: string
+  nombre: string
+  codigoQR: string
+  cantidadDisponible: number
+  urlImagen: string | null
+  estado: number
+  fechaCreacion: string
 }
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function DecantPage({
+  params,
+  searchParams,               // ← lo añadimos aquí
+}: {
+  params: { id: string }
+  searchParams: Record<string, string | string[]>  // o `ParsedUrlQuery` si prefieres
+}) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/Decants/${params.id}`,
     { cache: 'no-store' }
-  );
-  if (!res.ok) notFound();
-  const decant: Decant = await res.json();
+  )
+  if (!res.ok) notFound()
+  const decant: Decant = await res.json()
 
   return (
     <main className="pt-32 p-4 bg-gray-100 dark:bg-gray-900 min-h-screen">
@@ -46,5 +52,5 @@ export default async function Page({ params }: { params: { id: string } }) {
         </p>
       </div>
     </main>
-  );
+  )
 }
