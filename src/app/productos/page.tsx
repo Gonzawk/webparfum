@@ -23,7 +23,6 @@ interface ModelDetails {
 }
 
 const Productos: React.FC = () => {
-  // Ahora se permiten 3 secciones: 'marca', 'modelo' y 'listado'
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<'marca' | 'modelo' | 'listado'>('marca');
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -42,16 +41,17 @@ const Productos: React.FC = () => {
   const [products, setProducts] = useState<Perfume[]>([]);
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [error, setError] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Marca`)
       .then((res) => res.json())
-      .then((data) => setBrands(data))
+      .then(setBrands)
       .catch((err) => console.error('Error fetching brands', err));
 
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`)
       .then((res) => res.json())
-      .then((data) => setProducts(data))
+      .then(setProducts)
       .catch((err) => console.error('Error fetching products', err));
   }, []);
 
@@ -63,20 +63,12 @@ const Productos: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombre: brandName }),
       });
-      if (res.ok) {
-        const newBrand = await res.json();
-        setBrands((prev) => [...prev, newBrand]);
-        setBrandName('');
-      } else {
-        const msg = await res.text();
-        setError(`Error agregando marca: ${msg}`);
-      }
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(`Error en la solicitud: ${err.message}`);
-      } else {
-        setError("Error en la solicitud.");
-      }
+      if (!res.ok) throw new Error(await res.text());
+      const newB = await res.json();
+      setBrands((prev) => [...prev, newB]);
+      setBrandName('');
+    } catch (err: any) {
+      setError(err.message || 'Error en la solicitud.');
     }
   };
 
@@ -85,18 +77,10 @@ const Productos: React.FC = () => {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Marca/${marcaId}`, {
         method: 'DELETE',
       });
-      if (res.ok) {
-        setBrands((prev) => prev.filter((b) => b.marcaId !== marcaId));
-      } else {
-        const msg = await res.text();
-        setError(`Error eliminando marca: ${msg}`);
-      }
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(`Error en la solicitud: ${err.message}`);
-      } else {
-        setError("Error en la solicitud.");
-      }
+      if (!res.ok) throw new Error(await res.text());
+      setBrands((prev) => prev.filter((b) => b.marcaId !== marcaId));
+    } catch (err: any) {
+      setError(err.message || 'Error en la solicitud.');
     }
   };
 
@@ -112,53 +96,35 @@ const Productos: React.FC = () => {
       modelDetails.volumen === 0 ||
       modelDetails.stock === 0
     ) {
-      setError('Los campos Precio Minorista, Precio Mayorista, Volumen y Stock deben tener un valor mayor a 0.');
+      setError('Los campos Precio, Volumen y Stock deben ser mayores a 0.');
       return;
     }
     try {
-      const payload = {
-        ...modelDetails,
-        MarcaId: selectedBrandId
-      };
-      if (editingProductId === null) {
-        // Crear producto
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`, {
+      const payload = { ...modelDetails, MarcaId: selectedBrandId };
+      let res: Response;
+      if (editingProductId == null) {
+        res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        if (res.ok) {
-          const newProduct = await res.json();
-          setProducts((prev) => [...prev, newProduct]);
-          resetModelForm();
-        } else {
-          const msg = await res.text();
-          setError(`Error agregando modelo: ${msg}`);
-        }
       } else {
-        // Actualizar producto
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${editingProductId}`, {
+        res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${editingProductId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...payload, perfumeId: editingProductId }),
         });
-        if (res.ok) {
-          const updatedProduct = await res.json();
-          setProducts((prev) =>
-            prev.map((p) => (p.perfumeId === editingProductId ? updatedProduct : p))
-          );
-          resetModelForm();
-        } else {
-          const msg = await res.text();
-          setError(`Error actualizando modelo: ${msg}`);
-        }
       }
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(`Error en la solicitud: ${err.message}`);
-      } else {
-        setError("Error en la solicitud.");
-      }
+      if (!res.ok) throw new Error(await res.text());
+      const saved = await res.json();
+      setProducts((prev) =>
+        editingProductId == null
+          ? [...prev, saved]
+          : prev.map((p) => (p.perfumeId === editingProductId ? saved : p))
+      );
+      resetModelForm();
+    } catch (err: any) {
+      setError(err.message || 'Error en la solicitud.');
     }
   };
 
@@ -175,21 +141,23 @@ const Productos: React.FC = () => {
     });
     setSelectedBrandId('');
     setEditingProductId(null);
+    setIsModalOpen(false);
   };
 
-  const handleEditProduct = (product: Perfume) => {
-    setEditingProductId(product.perfumeId);
+  const handleEditProduct = (p: Perfume) => {
+    setEditingProductId(p.perfumeId);
     setModelDetails({
-      modelo: product.modelo,
-      precioMinorista: product.precioMinorista,
-      precioMayorista: product.precioMayorista,
-      genero: product.genero,
-      descripcion: product.descripcion || '',
-      volumen: product.volumen,
-      stock: product.stock,
-      imagenUrl: product.imagenUrl || ''
+      modelo: p.modelo,
+      precioMinorista: p.precioMinorista,
+      precioMayorista: p.precioMayorista,
+      genero: p.genero,
+      descripcion: p.descripcion || '',
+      volumen: p.volumen,
+      stock: p.stock,
+      imagenUrl: p.imagenUrl || ''
     });
-    setSelectedBrandId(product.marcaId);
+    setSelectedBrandId(p.marcaId);
+    setIsModalOpen(true);
   };
 
   const handleDeleteProduct = async (id: number) => {
@@ -197,95 +165,64 @@ const Productos: React.FC = () => {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}`, {
         method: 'DELETE',
       });
-      if (res.ok) {
-        setProducts((prev) => prev.filter((p) => p.perfumeId !== id));
-      } else {
-        const msg = await res.text();
-        setError(`Error eliminando producto: ${msg}`);
-      }
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(`Error en la solicitud: ${err.message}`);
-      } else {
-        setError("Error en la solicitud.");
-      }
+      if (!res.ok) throw new Error(await res.text());
+      setProducts((prev) => prev.filter((p) => p.perfumeId !== id));
+    } catch (err: any) {
+      setError(err.message || 'Error en la solicitud.');
     }
   };
 
   return (
     <PrivateRoutes>
       <Navbar />
-      <div className="pt-32 p-4 bg-gray-800 min-h-screen">
+      <div className="pt-32 px-4 pb-8 bg-gray-800 min-h-screen">
         <h1 className="text-4xl font-bold text-center text-white mb-8">Productos</h1>
 
-        {/* Navbar secundario para secciones */}
-        <div className="mb-8 flex justify-center space-x-4">
-          <button
-            onClick={() => setActiveSection('marca')}
-            className={`px-4 py-2 rounded-md font-medium transition-colors bg-gray-800 text-white ${
-              activeSection === 'marca'
-                ? 'border border-white'
-                : 'border border-transparent hover:border-white'
-            }`}
-          >
-            Marca
-          </button>
-          <button
-            onClick={() => setActiveSection('modelo')}
-            className={`px-4 py-2 rounded-md font-medium transition-colors bg-gray-800 text-white ${
-              activeSection === 'modelo'
-                ? 'border border-white'
-                : 'border border-transparent hover:border-white'
-            }`}
-          >
-            Modelo - Detalles
-          </button>
-          <button
-            onClick={() => setActiveSection('listado')}
-            className={`px-4 py-2 rounded-md font-medium transition-colors bg-gray-800 text-white ${
-              activeSection === 'listado'
-                ? 'border border-white'
-                : 'border border-transparent hover:border-white'
-            }`}
-          >
-            Listado
-          </button>
-
-          {/* Nuevo botón para administrar Decants */}
-          <button
+        {/* Secciones */}
+        <div className="flex justify-center space-x-4 mb-8">
+          {(['marca', 'modelo', 'listado'] as const).map((sec) => (
+            <button
+              key={sec}
+              onClick={() => setActiveSection(sec)}
+              className={`px-4 py-2 rounded-md font-medium bg-gray-800 text-white transition ${
+                activeSection === sec ? 'border border-white' : 'border-transparent hover:border-white'
+              }`}
+            >
+              {sec === 'modelo' ? 'Modelo - Detalles' : sec.charAt(0).toUpperCase() + sec.slice(1)}
+            </button>
+          ))}
+          {/* <button
             onClick={() => router.push('/decants')}
-            className="px-4 py-2 rounded-md font-medium transition-colors bg-gray-800 text-white border border-transparent hover:border-white"
+            className="px-4 py-2 rounded-md font-medium bg-gray-800 text-white border-transparent hover:border-white"
           >
             Decants
-          </button>
+          </button> */}
         </div>
 
+        {/* Marca */}
         {activeSection === 'marca' && (
-          <div className="max-w-2xl mx-auto bg-white rounded-lg p-6 shadow mb-8">
+          <div className="max-w-2xl mx-auto bg-white rounded-lg p-6 shadow mb-8 text-black">
             <h2 className="text-2xl font-bold mb-6 text-gray-800">Administrar Marcas</h2>
-            <form onSubmit={handleAddBrand} className="mb-6 space-y-4">
+            <form onSubmit={handleAddBrand} className="space-y-4">
               <input
                 type="text"
                 value={brandName}
                 onChange={(e) => setBrandName(e.target.value)}
                 placeholder="Nueva Marca"
-                className="w-full border border-gray-300 rounded px-4 py-2 text-gray-800"
+                className="w-full border border-gray-300 rounded px-4 py-2"
                 required
               />
               <button type="submit" className="w-full bg-blue-500 text-white px-4 py-2 rounded">
                 Agregar Marca
               </button>
             </form>
-            <div className="space-y-2">
-              {brands.map((brand) => (
-                <div key={brand.marcaId} className="flex justify-between items-center border-b pb-2">
-                  <span className="text-gray-800">{brand.nombre}</span>
+            <div className="mt-6 space-y-2">
+              {brands.map((b) => (
+                <div key={b.marcaId} className="flex justify-between items-center border-b pb-2">
+                  <span>{b.nombre}</span>
                   <div className="space-x-2">
                     <button className="bg-yellow-500 text-white px-3 py-1 rounded">Editar</button>
-                    <button
-                      onClick={() => handleDeleteBrand(brand.marcaId)}
-                      className="bg-red-500 text-white px-3 py-1 rounded"
-                    >
+                    <button onClick={() => handleDeleteBrand(b.marcaId)} className="bg-red-500 text-white px-3 py-1 rounded">
                       Eliminar
                     </button>
                   </div>
@@ -295,216 +232,193 @@ const Productos: React.FC = () => {
           </div>
         )}
 
+        {/* Modelo - Detalles */}
         {activeSection === 'modelo' && (
-          <div className="mx-auto" style={{ maxWidth: "1280px" }}>
-            <div className="bg-white rounded-lg p-6 shadow">
-              <h2 className="text-2xl font-bold mb-6 text-gray-800">Modelo - Detalles</h2>
-              <form onSubmit={handleSaveModel} className="mb-6 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block mb-1 text-gray-800">Nombre del Modelo</label>
-                    <input
-                      type="text"
-                      value={modelDetails.modelo}
-                      onChange={(e) =>
-                        setModelDetails({ ...modelDetails, modelo: e.target.value })
-                      }
-                      className="w-full border border-gray-300 rounded px-4 py-2 text-gray-800"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-1 text-gray-800">Precio Minorista</label>
-                    <input
-                      type="number"
-                      value={modelDetails.precioMinorista === 0 ? '' : modelDetails.precioMinorista}
-                      onChange={(e) =>
-                        setModelDetails({ 
-                          ...modelDetails, 
-                          precioMinorista: e.target.value === '' ? 0 : Number(e.target.value) 
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded px-4 py-2 text-gray-800"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-1 text-gray-800">Precio Mayorista</label>
-                    <input
-                      type="number"
-                      value={modelDetails.precioMayorista === 0 ? '' : modelDetails.precioMayorista}
-                      onChange={(e) =>
-                        setModelDetails({ 
-                          ...modelDetails, 
-                          precioMayorista: e.target.value === '' ? 0 : Number(e.target.value) 
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded px-4 py-2 text-gray-800"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-1 text-gray-800">Género</label>
-                    <input
-                      type="text"
-                      value={modelDetails.genero}
-                      onChange={(e) =>
-                        setModelDetails({ ...modelDetails, genero: e.target.value })
-                      }
-                      className="w-full border border-gray-300 rounded px-4 py-2 text-gray-800"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <label className="block mb-1 text-gray-800">Descripción</label>
-                  <textarea
-                    value={modelDetails.descripcion}
-                    onChange={(e) =>
-                      setModelDetails({ ...modelDetails, descripcion: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded px-4 py-2 text-gray-800"
-                    rows={3}
-                  ></textarea>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                  <div>
-                    <label className="block mb-1 text-gray-800">Volumen (ml)</label>
-                    <input
-                      type="number"
-                      value={modelDetails.volumen === 0 ? '' : modelDetails.volumen}
-                      onChange={(e) =>
-                        setModelDetails({ 
-                          ...modelDetails, 
-                          volumen: e.target.value === '' ? 0 : Number(e.target.value) 
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded px-4 py-2 text-gray-800"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-1 text-gray-800">Stock</label>
-                    <input
-                      type="number"
-                      value={modelDetails.stock === 0 ? '' : modelDetails.stock}
-                      onChange={(e) =>
-                        setModelDetails({ 
-                          ...modelDetails, 
-                          stock: e.target.value === '' ? 0 : Number(e.target.value) 
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded px-4 py-2 text-gray-800"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-1 text-gray-800">Imagen URL</label>
-                    <input
-                      type="text"
-                      value={modelDetails.imagenUrl}
-                      onChange={(e) =>
-                        setModelDetails({ ...modelDetails, imagenUrl: e.target.value })
-                      }
-                      className="w-full border border-gray-300 rounded px-4 py-2 text-gray-800"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <label className="block mb-1 text-gray-800">Seleccionar Marca</label>
-                  <select
-                    value={selectedBrandId}
-                    onChange={(e) => setSelectedBrandId(Number(e.target.value))}
-                    className="w-full border border-gray-300 rounded px-4 py-2 text-gray-800"
-                    required
-                  >
-                    <option value="">Selecciona una marca</option>
-                    {brands.map((brand) => (
-                      <option key={brand.marcaId} value={brand.marcaId}>
-                        {brand.nombre}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <button type="submit" className="w-full bg-blue-500 text-white px-4 py-2 rounded mt-4">
-                  {editingProductId ? 'Actualizar Modelo' : 'Agregar Modelo'}
-                </button>
-              </form>
+          <div className="max-w-4xl mx-auto mb-8">
+            <div className="bg-white rounded-lg p-6 shadow mb-6 text-black">
+              <h2 className="text-2xl font-bold mb-4 text-gray-800">Modelo - Detalles</h2>
+              <button onClick={() => setIsModalOpen(true)} className="bg-blue-500 text-white px-4 py-2 rounded">
+                {editingProductId == null ? 'Agregar Modelo' : 'Editar Modelo'}
+              </button>
               <div className="mt-6 divide-y divide-gray-300">
                 {products.length === 0 ? (
-                  <p className="text-gray-800">No hay modelos cargados.</p>
+                  <p>No hay modelos cargados.</p>
                 ) : (
-                  products.map((product) => {
-                    const brand = brands.find((b) => b.marcaId === product.marcaId);
-                    return (
-                      <div
-                        key={product.perfumeId}
-                        className="py-2 flex flex-col sm:flex-row justify-between items-center"
-                      >
-                        <span className="text-gray-800 mb-2 sm:mb-0">
-                          {product.modelo} - {brand ? brand.nombre : 'Sin marca'} (ID: {product.perfumeId})
-                        </span>
-                        <div className="flex flex-col sm:flex-row space-y-2 sm:space-x-2 sm:space-y-0">
-                          <button
-                            onClick={() => handleEditProduct(product)}
-                            className="bg-yellow-500 text-white px-3 py-1 rounded"
-                          >
-                            Editar
-                          </button>
-                          <button
-                            onClick={() => handleDeleteProduct(product.perfumeId)}
-                            className="bg-red-500 text-white px-3 py-1 rounded"
-                          >
-                            Eliminar
-                          </button>
-                        </div>
+                  products.map((p) => (
+                    <div key={p.perfumeId} className="py-2 flex justify-between items-center">
+                      <span>
+                        {p.modelo} - {(brands.find((b) => b.marcaId === p.marcaId)?.nombre) || 'Sin marca'} (ID: {p.perfumeId})
+                      </span>
+                      <div className="space-x-2">
+                        <button onClick={() => handleEditProduct(p)} className="bg-yellow-500 text-white px-3 py-1 rounded">
+                          Editar
+                        </button>
+                        <button onClick={() => handleDeleteProduct(p.perfumeId)} className="bg-red-500 text-white px-3 py-1 rounded">
+                          Eliminar
+                        </button>
                       </div>
-                    );
-                  })
+                    </div>
+                  ))
                 )}
               </div>
             </div>
+
+            {/* Modal sobre la página existente */}
+            {isModalOpen && (
+              <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+                <div className="pointer-events-auto bg-white rounded-lg p-6 shadow-lg w-full max-w-lg text-black">
+                  <h3 className="text-xl font-bold mb-4">
+                    {editingProductId == null ? 'Nuevo Modelo' : 'Editar Modelo'}
+                  </h3>
+                  <form onSubmit={handleSaveModel} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block mb-1">Nombre del Modelo</label>
+                        <input
+                          type="text"
+                          value={modelDetails.modelo}
+                          onChange={(e) => setModelDetails({ ...modelDetails, modelo: e.target.value })}
+                          className="w-full border rounded px-3 py-2"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block mb-1">Precio Minorista</label>
+                        <input
+                          type="number"
+                          value={modelDetails.precioMinorista || ''}
+                          onChange={(e) => setModelDetails({ ...modelDetails, precioMinorista: Number(e.target.value) })}
+                          className="w-full border rounded px-3 py-2"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block mb-1">Precio Mayorista</label>
+                        <input
+                          type="number"
+                          value={modelDetails.precioMayorista || ''}
+                          onChange={(e) => setModelDetails({ ...modelDetails, precioMayorista: Number(e.target.value) })}
+                          className="w-full border rounded px-3 py-2"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block mb-1">Género</label>
+                        <input
+                          type="text"
+                          value={modelDetails.genero}
+                          onChange={(e) => setModelDetails({ ...modelDetails, genero: e.target.value })}
+                          className="w-full border rounded px-3 py-2"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block mb-1">Descripción</label>
+                      <textarea
+                        rows={3}
+                        value={modelDetails.descripcion}
+                        onChange={(e) => setModelDetails({ ...modelDetails, descripcion: e.target.value })}
+                        className="w-full border rounded px-3 py-2"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block mb-1">Volumen (ml)</label>
+                        <input
+                          type="number"
+                          value={modelDetails.volumen || ''}
+                          onChange={(e) => setModelDetails({ ...modelDetails, volumen: Number(e.target.value) })}
+                          className="w-full border rounded px-3 py-2"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block mb-1">Stock</label>
+                        <input
+                          type="number"
+                          value={modelDetails.stock || ''}
+                          onChange={(e) => setModelDetails({ ...modelDetails, stock: Number(e.target.value) })}
+                          className="w-full border rounded px-3 py-2"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block mb-1">URL Imagen</label>
+                        <input
+                          type="text"
+                          value={modelDetails.imagenUrl}
+                          onChange={(e) => setModelDetails({ ...modelDetails, imagenUrl: e.target.value })}
+                          className="w-full border rounded px-3 py-2"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block mb-1">Marca</label>
+                      <select
+                        value={selectedBrandId}
+                        onChange={(e) => setSelectedBrandId(Number(e.target.value))}
+                        className="w-full border rounded px-3 py-2"
+                        required
+                      >
+                        <option value="">Selecciona una marca</option>
+                        {brands.map((b) => (
+                          <option key={b.marcaId} value={b.marcaId}>
+                            {b.nombre}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded">
+                      {editingProductId == null ? 'Agregar Modelo' : 'Actualizar Modelo'}
+                    </button>
+                  </form>
+                  <button onClick={resetModelForm} className="mt-4 w-full bg-red-500 text-white py-2 rounded">
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
+        {/* Listado */}
         {activeSection === 'listado' && (
-          <div className="mx-auto" style={{ maxWidth: "1280px" }}>
-            <div className="bg-white rounded-lg p-6 shadow">
-              <h2 className="text-2xl font-bold mb-6 text-gray-800">Listado de Productos</h2>
-              <div className="overflow-x-auto">
-                <table className="min-w-full border-collapse text-black">
-                  <thead>
-                    <tr>
-                      <th className="border px-4 py-2 text-black">ID</th>
-                      <th className="border px-4 py-2 text-black">Modelo</th>
-                      <th className="border px-4 py-2 text-black">Marca</th>
-                      <th className="border px-4 py-2 text-black">Precio Minorista</th>
-                      <th className="border px-4 py-2 text-black">Precio Mayorista</th>
-                      <th className="border px-4 py-2 text-black">Género</th>
-                      <th className="border px-4 py-2 text-black">Volumen</th>
-                      <th className="border px-4 py-2 text-black">Stock</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {products.map((product) => {
-                      const brand = brands.find((b) => b.marcaId === product.marcaId);
-                      return (
-                        <tr key={product.perfumeId}>
-                          <td className="border px-4 py-2 text-center text-black">{product.perfumeId}</td>
-                          <td className="border px-4 py-2 text-black">{product.modelo}</td>
-                          <td className="border px-4 py-2 text-black">{brand ? brand.nombre : 'Sin marca'}</td>
-                          <td className="border px-4 py-2 text-right text-black">${product.precioMinorista.toFixed(2)}</td>
-                          <td className="border px-4 py-2 text-right text-black">${product.precioMayorista.toFixed(2)}</td>
-                          <td className="border px-4 py-2 text-center text-black">{product.genero}</td>
-                          <td className="border px-4 py-2 text-center text-black">{product.volumen} ml</td>
-                          <td className="border px-4 py-2 text-center text-black">{product.stock}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+          <div className="max-w-4xl mx-auto bg-white rounded-lg p-6 shadow text-black">
+            <h2 className="text-2xl font-bold mb-6 text-gray-800">Listado de Productos</h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th className="border px-4 py-2">ID</th>
+                    <th className="border px-4 py-2">Modelo</th>
+                    <th className="border px-4 py-2">Marca</th>
+                    <th className="border px-4 py-2">Minorista</th>
+                    <th className="border px-4 py-2">Mayorista</th>
+                    <th className="border px-4 py-2">Género</th>
+                    <th className="border px-4 py-2">Volumen</th>
+                    <th className="border px-4 py-2">Stock</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {products.map((p) => {
+                    const mb = brands.find((b) => b.marcaId === p.marcaId)?.nombre || 'Sin marca';
+                    return (
+                      <tr key={p.perfumeId}>
+                        <td className="border px-4 py-2 text-center">{p.perfumeId}</td>
+                        <td className="border px-4 py-2">{p.modelo}</td>
+                        <td className="border px-4 py-2">{mb}</td>
+                        <td className="border px-4 py-2 text-right">${p.precioMinorista.toFixed(2)}</td>
+                        <td className="border px-4 py-2 text-right">${p.precioMayorista.toFixed(2)}</td>
+                        <td className="border px-4 py-2 text-center">{p.genero}</td>
+                        <td className="border px-4 py-2 text-center">{p.volumen} ml</td>
+                        <td className="border px-4 py-2 text-center">{p.stock}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
